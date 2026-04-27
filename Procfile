@@ -1,0 +1,1 @@
+web: cd "project file/Youtube/django/studentstudyportal" && gunicorn studentstudyportal.wsgi:application --bind 0.0.0.0:$PORT
