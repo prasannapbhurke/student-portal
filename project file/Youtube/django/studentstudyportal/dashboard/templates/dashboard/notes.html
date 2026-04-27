@@ -1,0 +1,32 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container">
+    <h2 class="mt-4">Notes</h2>
+    <div class="d-flex justify-content-between mb-3">
+        <a href="{% url 'add_note' %}" class="btn btn-primary">Add Note</a>
+        <form method="get" class="form-inline">
+            <input class="form-control mr-2" type="search" name="q" placeholder="Search notes..." value="{{ query }}">
+            <button class="btn btn-outline-secondary" type="submit">Search</button>
+        </form>
+    </div>
+    <div class="row">
+        {% for note in notes %}
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ note.title }}</h5>
+                    <p class="card-text">{{ note.description }}</p>
+                    <a href="{% url 'edit_note' note.id %}" class="btn btn-warning mr-2">Edit</a>
+                    <a href="{% url 'delete_note' note.id %}" class="btn btn-danger">Delete</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p>No notes yet.</p>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}

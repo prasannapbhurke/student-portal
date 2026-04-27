@@ -1,0 +1,270 @@
+@import url("https://fonts.googleapis.com/css?family=Acme|Lobster|Patua+One|Rubik|Sniglet|Quicksand|Barlow");
+
+html {
+    scroll-behavior: smooth;
+    height: 100%;
+    width: 100%;
+}
+
+main {
+    font-family: Barlow, Quicksand, Rubik, sans-serif, serif, 'Times New Roman', Times, serif !important;
+}
+
+footer {
+    font-family: Rubik, sans-serif, serif, 'Times New Roman', Times, serif;
+}
+
+.example::-webkit-scrollbar {
+    display: none;
+}
+
+.navbar {
+    background-color: rgb(0, 0, 0) !important;
+}
+
+.card {
+    box-shadow: 15px 15px 10px rgb(78, 77, 77);
+    transition: all 0.3s ease;
+    animation: fadeInUp 0.6s ease-out;
+}
+
+.card:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 20px 20px 15px rgba(78, 77, 77, 0.8);
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.card-header:hover {
+    background: rgb(11, 22, 83) !important;
+    color: whitesmoke !important;
+    transition: 0.1s ease-in;
+}
+
+a {
+    text-decoration: none !important;
+    color: black;
+}
+
+a:hover {
+    text-decoration: none;
+    color: black;
+}
+
+.custom-header:hover {
+    background: rgb(143, 189, 186) !important;
+}
+
+.card-header {
+    color: black !important;
+    background: rgb(152, 214, 230) !important;
+    transition: 0.3s ease-in;
+}
+
+.nav-link:hover {
+    background: black !important;
+    color: white !important;
+    transition: 0.7s ease;
+}
+
+.icon-bar {
+    color: black;
+}
+
+.card h4 {
+    margin: 40px 40px 0 40px;
+    text-align: left;
+}
+
+.card h6 {
+    margin: 25px 40px 0 40px;
+    text-align: left;
+}
+
+.card p {
+    text-align: right;
+    margin-right: 50px;
+    line-height: 10px;
+}
+
+.button {
+    display: inline-block;
+    font-family: "Montserrat", "Trebuchet MS", Helvetica, sans-serif;
+    padding: .8em 1.4em;
+    padding-right: 4.7em;
+    background: #009ED8;
+    border: none;
+    color: white;
+}
+
+.card img {
+    height: 210px;
+    object-fit: cover;
+}
+
+html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+    height: 100%;
+    width: 100%;
+}
+
+body {
+    background: linear-gradient(rgba(0, 0, 0, 0.2), rgba(255, 255, 255, 0.5));
+    overflow-x: hidden;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+.card-header {
+    background-color: rgb(133, 204, 231);
+}
+
+.myimage {
+    opacity: 1;
+    display: block;
+    transition: .5s ease;
+    backface-visibility: hidden;
+}
+
+.card-img-top:hover {
+    opacity: 0.9;
+    transform: scale(1.02);
+    transition: 0.2s ease;
+}
+
+.col-md-3 .card {
+    width: 100%;
+    height: 100%;
+}
+
+.btn:hover {
+    background: black;
+    color: white;
+    border: 0.5px solid white;
+}
+
+.fa:hover {
+    color: red;
+}
+
+.fa {
+    color: black;
+}
+
+.profa {
+    color: black;
+}
+
+footer .container-fluid {
+    padding: 10vmin 10vmin;
+}
+
+footer .column a+a {
+    padding: 0 0.7em;
+}
+
+.content-section {
+    background: #ffffff;
+    padding: 10px 20px;
+    border: 1px solid #dddddd;
+    border-radius: 3px;
+    margin-bottom: 20px;
+}
+
+.account-img {
+    height: 125px;
+    width: 125px;
+    margin-right: 20px;
+    margin-bottom: 16px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: #333333;
+}
+
+.welcome-header {
+    text-align: center;
+    margin: 40px 0;
+    font-size: 2.5rem;
+    color: #333;
+    font-weight: bold;
+}
+
+.card-body {
+    background-color: #f8f9fa;
+}
+
+.card-body h5 {
+    color: #0066cc;
+    font-weight: bold;
+}
+
+.card-body p {
+    color: #555;
+    font-size: 0.95rem;
+}
+
+/* Dark mode support */
+.dark-mode, @media (prefers-color-scheme: dark) {
+    body {
+        background: linear-gradient(rgba(30, 30, 30, 0.9), rgba(50, 50, 50, 0.9));
+        color: #e0e0e0;
+    }
+
+    .navbar {
+        background-color: #333 !important;
+    }
+
+    .card {
+        background-color: #2a2a2a;
+        color: #e0e0e0;
+        border-color: #555;
+    }
+
+    .card-header {
+        background-color: #444 !important;
+        color: #e0e0e0 !important;
+    }
+
+    .btn-outline-secondary {
+        color: #e0e0e0;
+        border-color: #e0e0e0;
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: #e0e0e0;
+        color: #333;
+    }
+
+    .alert {
+        background-color: #444;
+        color: #e0e0e0;
+        border-color: #555;
+    }
+
+    .footer {
+        background-color: #333;
+        color: #e0e0e0;
+    }
+
+    .form-control {
+        background-color: #333;
+        color: #e0e0e0;
+        border-color: #555;
+    }
+
+    .form-control:focus {
+        background-color: #444;
+        color: #e0e0e0;
+    }
+}

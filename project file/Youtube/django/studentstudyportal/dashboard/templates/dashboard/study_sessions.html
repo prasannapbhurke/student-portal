@@ -1,0 +1,35 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container">
+    <h2 class="mt-4">Study Sessions</h2>
+    <p>Total study time: {{ total_time }} minutes</p>
+    <div class="d-flex justify-content-between mb-3">
+        <a href="{% url 'add_study_session' %}" class="btn btn-success">Add Study Session</a>
+        <form method="get" class="form-inline">
+            <input class="form-control mr-2" type="search" name="q" placeholder="Search subjects..." value="{{ query }}">
+            <button class="btn btn-outline-secondary" type="submit">Search</button>
+        </form>
+    </div>
+    <div class="row">
+        {% for session in sessions %}
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ session.subject }}</h5>
+                    <p class="card-text"><strong>Duration:</strong> {{ session.duration }} minutes</p>
+                    <p class="card-text"><strong>Date:</strong> {{ session.date }}</p>
+                    {% if session.notes %}
+                    <p class="card-text">{{ session.notes }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p>No study sessions yet.</p>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}

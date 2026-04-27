@@ -1,0 +1,25 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container">
+    <h2 class="mt-4">YouTube Search</h2>
+    <form method="get" class="mb-4">
+        <div class="form-group">
+            <label for="query">Search YouTube</label>
+            <input type="text" class="form-control" id="query" name="query" placeholder="Enter search term" value="{{ request.GET.query }}">
+        </div>
+        <button type="submit" class="btn btn-danger">Search</button>
+    </form>
+    {% if request.GET.query %}
+    <div class="alert alert-info">
+        <h5>Search Results</h5>
+        <p>Click the link below to view YouTube search results:</p>
+        <a href="https://www.youtube.com/results?search_query={{ request.GET.query|urlencode }}" target="_blank" class="btn btn-danger">
+            <i class="fab fa-youtube"></i> Open YouTube Search
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+{% endblock %}

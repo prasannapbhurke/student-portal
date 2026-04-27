@@ -1,0 +1,24 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container">
+    <h2 class="mt-4">Unit Conversions</h2>
+    <div class="row">
+        {% for conv in conversions %}
+        <div class="col-md-4 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ conv.name }}</h5>
+                    <p class="card-text">{{ conv.from_unit }} to {{ conv.to_unit }}</p>
+                    <p class="card-text"><strong>Formula:</strong> {{ conv.formula }}</p>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p>No conversions available.</p>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}

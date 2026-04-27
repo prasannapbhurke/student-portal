@@ -1,0 +1,75 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container">
+    <h2 class="mt-4">To Do</h2>
+    {% if overdue_count > 0 %}
+    <div class="alert alert-danger">
+        <strong>Alert!</strong> You have {{ overdue_count }} overdue todo(s). Please review them.
+    </div>
+    {% endif %}
+    <div class="d-flex justify-content-between mb-3">
+        <a href="{% url 'add_todo' %}" class="btn btn-primary">Add Todo</a>
+        <form method="get" class="form-inline">
+            <input class="form-control mr-2" type="search" name="q" placeholder="Search todos..." value="{{ query }}">
+            <button class="btn btn-outline-secondary" type="submit">Search</button>
+        </form>
+    </div>
+    <div class="row">
+        {% for t in todos %}
+        <div class="col-md-4 mb-4">
+            <div class="card {% if not t.completed and t.due_date and t.due_date < today %}border-danger{% endif %}">
+                <div class="card-body">
+                    <h5 class="card-title">{{ t.title }}</h5>
+                    <p class="card-text">{{ t.description }}</p>
+                    <p class="card-text"><strong>Priority:</strong>
+                        <span class="badge badge-{% if t.priority == 'high' %}danger{% elif t.priority == 'medium' %}warning{% else %}secondary{% endif %}">{{ t.priority }}</span>
+                    </p>
+                    <p class="card-text"><strong>Category:</strong> <span class="badge badge-info">{{ t.get_category_display }}</span></p>
+                    {% if t.due_date %}
+                    <p class="card-text"><strong>Due Date:</strong> {{ t.due_date }}
+                        {% if not t.completed and t.due_date < today %}
+                        <span class="text-danger">(Overdue!)</span>
+                        {% endif %}
+                    </p>
+                    {% endif %}
+                    <div class="progress mb-2">
+                        <div class="progress-bar" role="progressbar" style="width: {{ t.progress }}%" aria-valuenow="{{ t.progress }}" aria-valuemin="0" aria-valuemax="100">{{ t.progress }}%</div>
+                    </div>
+                    <h6>Subtasks:</h6>
+                    <ul class="list-group mb-2">
+                        {% for sub in t.subtasks.all %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span {% if sub.completed %}style="text-decoration: line-through;"{% endif %}>{{ sub.title }}</span>
+                            <a href="{% url 'toggle_subtask' sub.id %}" class="btn btn-sm {% if sub.completed %}btn-secondary{% else %}btn-success{% endif %}">
+                                {% if sub.completed %}Undo{% else %}Done{% endif %}
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    <form method="post" action="{% url 'add_subtask' t.id %}" class="mb-2">
+                        {% csrf_token %}
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="title" placeholder="Add subtask" required>
+                            <div class="input-group-append">
+                                <button class="btn btn-outline-primary" type="submit">Add</button>
+                            </div>
+                        </div>
+                    </form>
+                    {% if not t.completed %}
+                    <a href="{% url 'edit_todo' t.id %}" class="btn btn-warning mr-2">Edit</a>
+                    <a href="{% url 'mark_todo_complete' t.id %}" class="btn btn-success">Mark Complete</a>
+                    {% else %}
+                    <span class="badge badge-success">Completed</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p>No todos yet.</p>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}

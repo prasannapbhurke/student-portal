@@ -1,0 +1,45 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container">
+    <h2 class="mt-4">Study Calendar</h2>
+    <p>Upcoming deadlines and tasks</p>
+
+    <div class="row">
+        <div class="col-md-6">
+            <h4>Homework Deadlines</h4>
+            {% for hw in upcoming_homework %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">{{ hw.title }}</h5>
+                    <p class="card-text">{{ hw.subject }}</p>
+                    <p class="card-text"><strong>Due:</strong> {{ hw.due_date }}</p>
+                </div>
+            </div>
+            {% empty %}
+            <p>No upcoming homework.</p>
+            {% endfor %}
+        </div>
+
+        <div class="col-md-6">
+            <h4>Todo Due Dates</h4>
+            {% for todo in upcoming_todos %}
+            <div class="card mb-3">
+                <div class="card-body">
+                    <h5 class="card-title">{{ todo.title }}</h5>
+                    <p class="card-text">{{ todo.category }}</p>
+                    <p class="card-text"><strong>Due:</strong> {{ todo.due_date }}</p>
+                    <div class="progress">
+                        <div class="progress-bar" style="width: {{ todo.progress }}%">{{ todo.progress }}%</div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <p>No upcoming todos.</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,27 @@
+from django.urls import path
+from . import views
+
+urlpatterns = [
+    path('', views.home, name='home'),
+    path('notes/', views.notes, name='notes'),
+    path('add-note/', views.add_note, name='add_note'),
+    path('edit-note/<int:id>/', views.edit_note, name='edit_note'),
+    path('delete-note/<int:id>/', views.delete_note, name='delete_note'),
+    path('homework/', views.homework, name='homework'),
+    path('add-homework/', views.add_homework, name='add_homework'),
+    path('edit-homework/<int:id>/', views.edit_homework, name='edit_homework'),
+    path('todo/', views.todo, name='todo'),
+    path('add-todo/', views.add_todo, name='add_todo'),
+    path('edit-todo/<int:id>/', views.edit_todo, name='edit_todo'),
+    path('mark-todo-complete/<int:id>/', views.mark_todo_complete, name='mark_todo_complete'),
+    path('add-subtask/<int:todo_id>/', views.add_subtask, name='add_subtask'),
+    path('toggle-subtask/<int:id>/', views.toggle_subtask, name='toggle_subtask'),
+    path('books/', views.books, name='books'),
+    path('dictionary/', views.dictionary, name='dictionary'),
+    path('conversion/', views.conversion, name='conversion'),
+    path('youtube/', views.youtube_search, name='youtube'),
+    path('wiki/', views.wiki_search, name='wiki'),
+    path('calendar/', views.calendar_view, name='calendar'),
+    path('study-sessions/', views.study_sessions, name='study_sessions'),
+    path('add-study-session/', views.add_study_session, name='add_study_session'),
+]

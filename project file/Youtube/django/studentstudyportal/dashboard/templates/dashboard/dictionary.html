@@ -1,0 +1,32 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container">
+    <h2 class="mt-4">Dictionary</h2>
+    <form method="get" class="mb-4">
+        <div class="form-group">
+            <label for="word">Enter Word</label>
+            <input type="text" class="form-control" id="word" name="word" value="{{ word }}" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+    {% if result %}
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">{{ result.word }}</h5>
+            {% if result.pronunciation %}
+            <p class="card-text"><strong>Pronunciation:</strong> {{ result.pronunciation }}</p>
+            {% endif %}
+            <p class="card-text">{{ result.meaning }}</p>
+            {% if result.example %}
+            <p class="card-text"><strong>Example:</strong> {{ result.example }}</p>
+            {% endif %}
+        </div>
+    </div>
+    {% elif word %}
+    <p>Word not found.</p>
+    {% endif %}
+</div>
+
+{% endblock %}
