@@ -12,7 +12,7 @@
         </form>
     </div>
     <div class="row">
-        {% for hw in homework %}
+        {% for hw in page_obj %}
         <div class="col-md-4 mb-4">
             <div class="card">
                 <div class="card-body">
@@ -22,6 +22,7 @@
                     <p class="card-text"><strong>Deadline:</strong> {{ hw.deadline }}</p>
                     <p class="card-text"><strong>Status:</strong> {{ hw.status }}</p>
                     <a href="{% url 'edit_homework' hw.id %}" class="btn btn-warning mr-2">Edit</a>
+                    <a href="{% url 'delete_homework' hw.id %}" class="btn btn-danger confirm-delete">Delete</a>
                 </div>
             </div>
         </div>
@@ -29,6 +30,22 @@
         <p>No homework yet.</p>
         {% endfor %}
     </div>
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ query }}&status={{ status }}">Previous</a></li>
+            {% endif %}
+            {% for num in page_obj.paginator.page_range %}
+            <li class="page-item {% if page_obj.number == num %}active{% endif %}"><a class="page-link" href="?page={{ num }}&q={{ query }}&status={{ status }}">{{ num }}</a></li>
+            {% endfor %}
+            {% if page_obj.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ query }}&status={{ status }}">Next</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
 </div>
 
 {% endblock %}

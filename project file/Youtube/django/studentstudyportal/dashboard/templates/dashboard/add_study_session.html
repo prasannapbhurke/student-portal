@@ -1,27 +1,13 @@
 {% extends 'dashboard/base.html' %}
 {% load static %}
+{% load crispy_forms_tags %}
 {% block content %}
 
 <div class="container">
     <h2 class="mt-4">Add Study Session</h2>
     <form method="post">
         {% csrf_token %}
-        <div class="form-group">
-            <label for="subject">Subject</label>
-            <input type="text" class="form-control" id="subject" name="subject" required>
-        </div>
-        <div class="form-group">
-            <label for="duration">Duration (minutes)</label>
-            <input type="number" class="form-control" id="duration" name="duration" min="1" required>
-        </div>
-        <div class="form-group">
-            <label for="date">Date</label>
-            <input type="date" class="form-control" id="date" name="date" value="{{ today }}">
-        </div>
-        <div class="form-group">
-            <label for="notes">Notes</label>
-            <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
-        </div>
+        {{ form|crispy }}
         <button type="submit" class="btn btn-success">Add Session</button>
     </form>
 </div>

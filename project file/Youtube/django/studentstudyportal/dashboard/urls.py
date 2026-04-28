@@ -12,6 +12,7 @@ urlpatterns = [
     path('homework/', views.homework, name='homework'),
     path('add-homework/', views.add_homework, name='add_homework'),
     path('edit-homework/<int:id>/', views.edit_homework, name='edit_homework'),
+    path('delete-homework/<int:id>/', views.delete_homework, name='delete_homework'),
     path('todo/', views.todo, name='todo'),
     path('add-todo/', views.add_todo, name='add_todo'),
     path('edit-todo/<int:id>/', views.edit_todo, name='edit_todo'),

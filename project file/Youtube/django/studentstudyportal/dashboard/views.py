@@ -8,6 +8,7 @@ from django.conf import settings
 import csv
 import requests
 from .models import Note, Homework, Todo, Subtask, Book, DictionaryEntry, ConversionEntry, StudySession
+from .forms import NoteForm, HomeworkForm, TodoForm, SubtaskForm, StudySessionForm
 
 def home(request):
     """Home page with feature overview"""
@@ -23,10 +24,11 @@ def home(request):
     }
     return render(request, 'dashboard/home.html', context)
 
+@login_required
 def notes(request):
     """View all notes"""
-    user = request.user if request.user.is_authenticated else None
-    notes = Note.objects.filter(user=user) if user else Note.objects.filter(user__isnull=True)
+    user = request.user
+    notes = Note.objects.filter(user=user)
     q = request.GET.get('q')
     date_from = request.GET.get('date_from')
     date_to = request.GET.get('date_to')
@@ -42,7 +44,12 @@ def notes(request):
             notes.filter(id__in=selected_ids).delete()
             messages.success(request, f'Deleted {len(selected_ids)} notes.')
             return redirect('notes')
-    context = {'notes': notes, 'query': q, 'date_from': date_from, 'date_to': date_to}
+    # Pagination
+    from django.core.paginator import Paginator
+    paginator = Paginator(notes, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    context = {'page_obj': page_obj, 'query': q, 'date_from': date_from, 'date_to': date_to}
     return render(request, 'dashboard/notes.html', context)
 
 def export_notes(request):
@@ -57,11 +64,10 @@ def export_notes(request):
         writer.writerow([note.title, note.description, note.created_at])
     return response
 
+@login_required
 def dashboard(request):
     """Progress dashboard"""
-    user = request.user if request.user.is_authenticated else None
-    if not user:
-        return redirect('account_login')
+    user = request.user
     total_notes = Note.objects.filter(user=user).count()
     total_homework = Homework.objects.filter(user=user).count()
     pending_homework = Homework.objects.filter(user=user, status='pending').count()
@@ -95,158 +101,152 @@ def quizzes(request):
     # Placeholder
     return render(request, 'dashboard/quizzes.html')
 
+@login_required
 def add_note(request):
     """Add a new note"""
-    user = request.user if request.user.is_authenticated else None
-    if request.method == 'POST':
-        title = request.POST.get('title')
-        description = request.POST.get('description')
-        Note.objects.create(user=user, title=title, description=description)
+    form = NoteForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        note = form.save(commit=False)
+        note.user = request.user
+        note.save()
         messages.success(request, 'Note added successfully!')
         return redirect('notes')
-    return render(request, 'dashboard/add_note.html')
+    return render(request, 'dashboard/add_note.html', {'form': form})
 
+@login_required
 def edit_note(request, id):
     """Edit a note"""
-    user = request.user if request.user.is_authenticated else None
-    note = get_object_or_404(Note, id=id, user=user) if user else get_object_or_404(Note, id=id, user__isnull=True)
-    if request.method == 'POST':
-        note.title = request.POST.get('title')
-        note.description = request.POST.get('description')
-        note.save()
+    note = get_object_or_404(Note, id=id, user=request.user)
+    form = NoteForm(request.POST or None, instance=note)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
         messages.success(request, 'Note updated successfully!')
         return redirect('notes')
-    context = {'note': note}
-    return render(request, 'dashboard/edit_note.html', context)
+    return render(request, 'dashboard/edit_note.html', {'form': form, 'note': note})
 
+@login_required
 def delete_note(request, id):
     """Delete a note"""
-    user = request.user if request.user.is_authenticated else None
-    note = get_object_or_404(Note, id=id, user=user) if user else get_object_or_404(Note, id=id, user__isnull=True)
+    note = get_object_or_404(Note, id=id, user=request.user)
     note.delete()
-    messages.success(request, 'Note deleted!')
+    messages.success(request, 'Note deleted successfully!')
     return redirect('notes')
 
+@login_required
 def homework(request):
     """View all homework"""
-    user = request.user if request.user.is_authenticated else None
-    homework = Homework.objects.filter(user=user) if user else Homework.objects.filter(user__isnull=True)
+    user = request.user
+    homeworks = Homework.objects.filter(user=user).order_by('due_date')
     q = request.GET.get('q')
+    status = request.GET.get('status')
     if q:
-        homework = homework.filter(title__icontains=q) | homework.filter(description__icontains=q)
-    context = {'homework': homework, 'query': q}
-    return render(request, 'dashboard/homework.html', context)
+        homeworks = homeworks.filter(models.Q(title__icontains=q) | models.Q(description__icontains=q))
+    if status:
+        homeworks = homeworks.filter(status=status)
+    # Pagination
+    from django.core.paginator import Paginator
+    paginator = Paginator(homeworks, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request, 'dashboard/homework.html', {'page_obj': page_obj, 'query': q, 'status': status})
 
-def edit_homework(request, id):
-    """Edit homework"""
-    user = request.user if request.user.is_authenticated else None
-    homework = get_object_or_404(Homework, id=id, user=user) if user else get_object_or_404(Homework, id=id, user__isnull=True)
-    if request.method == 'POST':
-        homework.title = request.POST.get('title')
-        homework.description = request.POST.get('description')
-        homework.subject = request.POST.get('subject')
-        homework.deadline = request.POST.get('deadline')
-        homework.save()
-        messages.success(request, 'Homework updated!')
-        return redirect('homework')
-    context = {'homework': homework}
-    return render(request, 'dashboard/edit_homework.html', context)
-
+@login_required
 def add_homework(request):
-    """Add homework"""
-    user = request.user if request.user.is_authenticated else None
-    if request.method == 'POST':
-        title = request.POST.get('title')
-        description = request.POST.get('description')
-        subject = request.POST.get('subject')
-        deadline = request.POST.get('deadline')
-        Homework.objects.create(
-            user=user,
-            title=title,
-            description=description,
-            subject=subject,
-            deadline=deadline
-        )
-        messages.success(request, 'Homework added!')
+    """Add a new homework"""
+    form = HomeworkForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        homework = form.save(commit=False)
+        homework.user = request.user
+        homework.save()
+        messages.success(request, 'Homework added successfully!')
         return redirect('homework')
-    return render(request, 'dashboard/add_homework.html')
+    return render(request, 'dashboard/add_homework.html', {'form': form})
 
+@login_required
+def edit_homework(request, id):
+    """Edit a homework"""
+    homework = get_object_or_404(Homework, id=id, user=request.user)
+    form = HomeworkForm(request.POST or None, instance=homework)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        messages.success(request, 'Homework updated successfully!')
+        return redirect('homework')
+    return render(request, 'dashboard/edit_homework.html', {'form': form, 'homework': homework})
+
+@login_required
+def delete_homework(request, id):
+    """Delete a homework"""
+    homework = get_object_or_404(Homework, id=id, user=request.user)
+    homework.delete()
+    messages.success(request, 'Homework deleted successfully!')
+    return redirect('homework')
+
+@login_required
 def todo(request):
     """View all todos"""
-    user = request.user if request.user.is_authenticated else None
-    todos = Todo.objects.filter(user=user) if user else Todo.objects.filter(user__isnull=True)
+    user = request.user
+    todos = Todo.objects.filter(user=user).prefetch_related('subtasks').order_by('due_date')
     q = request.GET.get('q')
     if q:
-        todos = todos.filter(title__icontains=q) | todos.filter(description__icontains=q)
+        todos = todos.filter(models.Q(title__icontains=q) | models.Q(description__icontains=q))
     today = timezone.now().date()
     overdue_count = todos.filter(due_date__lt=today, completed=False).count()
-    context = {'todos': todos, 'today': today, 'query': q, 'overdue_count': overdue_count}
-    return render(request, 'dashboard/todo.html', context)
+    # Pagination
+    from django.core.paginator import Paginator
+    paginator = Paginator(todos, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request, 'dashboard/todo.html', {'page_obj': page_obj, 'today': today, 'query': q, 'overdue_count': overdue_count})
 
-def edit_todo(request, id):
-    """Edit a todo"""
-    user = request.user if request.user.is_authenticated else None
-    todo = get_object_or_404(Todo, id=id, user=user) if user else get_object_or_404(Todo, id=id, user__isnull=True)
-    if request.method == 'POST':
-        todo.title = request.POST.get('title')
-        todo.description = request.POST.get('description')
-        todo.priority = request.POST.get('priority', 'medium')
-        todo.category = request.POST.get('category', 'personal')
-        todo.progress = int(request.POST.get('progress', 0))
-        due_date = request.POST.get('due_date')
-        todo.due_date = due_date if due_date else None
-        todo.save()
-        messages.success(request, 'Todo updated!')
-        return redirect('todo')
-    context = {'todo': todo}
-    return render(request, 'dashboard/edit_todo.html', context)
-
+@login_required
 def add_todo(request):
     """Add a todo"""
-    user = request.user if request.user.is_authenticated else None
-    if request.method == 'POST':
-        title = request.POST.get('title')
-        description = request.POST.get('description')
-        priority = request.POST.get('priority', 'medium')
-        category = request.POST.get('category', 'personal')
-        progress = int(request.POST.get('progress', 0))
-        due_date = request.POST.get('due_date')
-        Todo.objects.create(
-            user=user,
-            title=title,
-            description=description,
-            priority=priority,
-            category=category,
-            progress=progress,
-            due_date=due_date if due_date else None
-        )
-        messages.success(request, 'Todo added!')
+    form = TodoForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        todo = form.save(commit=False)
+        todo.user = request.user
+        todo.save()
+        messages.success(request, 'Todo added successfully!')
         return redirect('todo')
-    return render(request, 'dashboard/add_todo.html')
+    return render(request, 'dashboard/add_todo.html', {'form': form})
 
+@login_required
+def edit_todo(request, id):
+    """Edit a todo"""
+    todo = get_object_or_404(Todo, id=id, user=request.user)
+    form = TodoForm(request.POST or None, instance=todo)
+    if request.method == 'POST' and form.is_valid():
+        form.save()
+        messages.success(request, 'Todo updated successfully!')
+        return redirect('todo')
+    return render(request, 'dashboard/edit_todo.html', {'form': form, 'todo': todo})
+
+@login_required
 def mark_todo_complete(request, id):
     """Mark todo as complete"""
-    user = request.user if request.user.is_authenticated else None
-    todo = get_object_or_404(Todo, id=id, user=user) if user else get_object_or_404(Todo, id=id, user__isnull=True)
+    todo = get_object_or_404(Todo, id=id, user=request.user)
     todo.completed = True
     todo.progress = 100
     todo.save()
     messages.success(request, 'Todo marked as complete!')
     return redirect('todo')
 
+@login_required
 def add_subtask(request, todo_id):
     """Add a subtask to a todo"""
-    user = request.user if request.user.is_authenticated else None
-    todo = get_object_or_404(Todo, id=todo_id, user=user) if user else get_object_or_404(Todo, id=todo_id, user__isnull=True)
-    if request.method == 'POST':
-        title = request.POST.get('title')
-        Subtask.objects.create(todo=todo, title=title)
+    todo = get_object_or_404(Todo, id=todo_id, user=request.user)
+    form = SubtaskForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        subtask = form.save(commit=False)
+        subtask.todo = todo
+        subtask.save()
         messages.success(request, 'Subtask added!')
     return redirect('todo')
 
+@login_required
 def toggle_subtask(request, id):
     """Toggle subtask completion"""
-    subtask = get_object_or_404(Subtask, id=id)
+    subtask = get_object_or_404(Subtask, id=id, todo__user=request.user)
     subtask.completed = not subtask.completed
     subtask.save()
     # Update todo progress based on subtasks
@@ -315,45 +315,49 @@ def wiki_search(request):
     context = {'query': query, 'summary': summary}
     return render(request, 'dashboard/wiki.html', context)
 
+@login_required
 def calendar_view(request):
     """Calendar view for homework and todos"""
-    user = request.user if request.user.is_authenticated else None
+    user = request.user
     today = timezone.now().date()
-    upcoming_homework = Homework.objects.filter(user=user, due_date__gte=today).order_by('due_date') if user else Homework.objects.filter(user__isnull=True, due_date__gte=today).order_by('due_date')
-    upcoming_todos = Todo.objects.filter(user=user, due_date__gte=today, completed=False).order_by('due_date') if user else Todo.objects.filter(user__isnull=True, due_date__gte=today, completed=False).order_by('due_date')
+    upcoming_homework = Homework.objects.filter(user=user, due_date__gte=today).order_by('due_date')
+    upcoming_todos = Todo.objects.filter(user=user, due_date__gte=today, completed=False).order_by('due_date')
+    events = []
+    for h in upcoming_homework:
+        events.append({'title': f'Homework: {h.title}', 'start': h.due_date.isoformat(), 'color': '#dc3545'})
+    for t in upcoming_todos:
+        events.append({'title': f'Todo: {t.title}', 'start': t.due_date.isoformat(), 'color': '#007bff'})
     context = {
         'today': today,
         'upcoming_homework': upcoming_homework,
         'upcoming_todos': upcoming_todos,
+        'events': events,
     }
     return render(request, 'dashboard/calendar.html', context)
 
+@login_required
 def study_sessions(request):
     """View study sessions"""
-    user = request.user if request.user.is_authenticated else None
-    sessions = StudySession.objects.filter(user=user) if user else StudySession.objects.filter(user__isnull=True)
+    sessions_qs = StudySession.objects.filter(user=request.user).order_by('-date')
     q = request.GET.get('q')
     if q:
-        sessions = sessions.filter(subject__icontains=q)
-    total_time = sessions.aggregate(total=models.Sum('duration'))['total'] or 0
-    context = {'sessions': sessions, 'query': q, 'total_time': total_time}
-    return render(request, 'dashboard/study_sessions.html', context)
+        sessions_qs = sessions_qs.filter(notes__icontains=q)
+    total_time = sessions_qs.aggregate(total=models.Sum('duration'))['total'] or 0
+    # Pagination
+    from django.core.paginator import Paginator
+    paginator = Paginator(sessions_qs, 10)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request, 'dashboard/study_sessions.html', {'page_obj': page_obj, 'query': q, 'total_time': total_time})
 
+@login_required
 def add_study_session(request):
-    """Add study session"""
-    user = request.user if request.user.is_authenticated else None
-    if request.method == 'POST':
-        subject = request.POST.get('subject')
-        duration = int(request.POST.get('duration'))
-        date = request.POST.get('date')
-        notes = request.POST.get('notes')
-        StudySession.objects.create(
-            user=user,
-            subject=subject,
-            duration=duration,
-            date=date or timezone.now().date(),
-            notes=notes
-        )
+    """Add a study session"""
+    form = StudySessionForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        session = form.save(commit=False)
+        session.user = request.user
+        session.save()
         messages.success(request, 'Study session added!')
         return redirect('study_sessions')
-    return render(request, 'dashboard/add_study_session.html')
+    return render(request, 'dashboard/add_study_session.html', {'form': form})
