@@ -5,6 +5,7 @@ from django.utils import timezone
 from django.db import models
 from django.http import HttpResponse
 from django.conf import settings
+from django_ratelimit.decorators import ratelimit
 import csv
 import requests
 from .models import Note, Homework, Todo, Subtask, Book, DictionaryEntry, ConversionEntry, StudySession
@@ -24,6 +25,7 @@ def home(request):
     }
     return render(request, 'dashboard/home.html', context)
 
+@ratelimit(key='ip', rate='30/m', block=True)
 @login_required
 def notes(request):
     """View all notes"""
@@ -101,6 +103,7 @@ def quizzes(request):
     # Placeholder
     return render(request, 'dashboard/quizzes.html')
 
+@ratelimit(key='ip', rate='10/m', block=True)
 @login_required
 def add_note(request):
     """Add a new note"""
@@ -113,6 +116,7 @@ def add_note(request):
         return redirect('notes')
     return render(request, 'dashboard/add_note.html', {'form': form})
 
+@ratelimit(key='ip', rate='10/m', block=True)
 @login_required
 def edit_note(request, id):
     """Edit a note"""
@@ -124,6 +128,7 @@ def edit_note(request, id):
         return redirect('notes')
     return render(request, 'dashboard/edit_note.html', {'form': form, 'note': note})
 
+@ratelimit(key='ip', rate='10/m', block=True)
 @login_required
 def delete_note(request, id):
     """Delete a note"""
@@ -132,6 +137,7 @@ def delete_note(request, id):
     messages.success(request, 'Note deleted successfully!')
     return redirect('notes')
 
+@ratelimit(key='ip', rate='30/m', block=True)
 @login_required
 def homework(request):
     """View all homework"""
@@ -150,6 +156,7 @@ def homework(request):
     page_obj = paginator.get_page(page_number)
     return render(request, 'dashboard/homework.html', {'page_obj': page_obj, 'query': q, 'status': status})
 
+@ratelimit(key='ip', rate='10/m', block=True)
 @login_required
 def add_homework(request):
     """Add a new homework"""
@@ -162,6 +169,7 @@ def add_homework(request):
         return redirect('homework')
     return render(request, 'dashboard/add_homework.html', {'form': form})
 
+@ratelimit(key='ip', rate='10/m', block=True)
 @login_required
 def edit_homework(request, id):
     """Edit a homework"""
@@ -173,6 +181,7 @@ def edit_homework(request, id):
         return redirect('homework')
     return render(request, 'dashboard/edit_homework.html', {'form': form, 'homework': homework})
 
+@ratelimit(key='ip', rate='10/m', block=True)
 @login_required
 def delete_homework(request, id):
     """Delete a homework"""
@@ -181,6 +190,7 @@ def delete_homework(request, id):
     messages.success(request, 'Homework deleted successfully!')
     return redirect('homework')
 
+@ratelimit(key='ip', rate='30/m', block=True)
 @login_required
 def todo(request):
     """View all todos"""
@@ -198,6 +208,7 @@ def todo(request):
     page_obj = paginator.get_page(page_number)
     return render(request, 'dashboard/todo.html', {'page_obj': page_obj, 'today': today, 'query': q, 'overdue_count': overdue_count})
 
+@ratelimit(key='ip', rate='10/m', block=True)
 @login_required
 def add_todo(request):
     """Add a todo"""
@@ -210,6 +221,7 @@ def add_todo(request):
         return redirect('todo')
     return render(request, 'dashboard/add_todo.html', {'form': form})
 
+@ratelimit(key='ip', rate='10/m', block=True)
 @login_required
 def edit_todo(request, id):
     """Edit a todo"""
@@ -221,6 +233,7 @@ def edit_todo(request, id):
         return redirect('todo')
     return render(request, 'dashboard/edit_todo.html', {'form': form, 'todo': todo})
 
+@ratelimit(key='ip', rate='10/m', block=True)
 @login_required
 def mark_todo_complete(request, id):
     """Mark todo as complete"""
@@ -231,6 +244,7 @@ def mark_todo_complete(request, id):
     messages.success(request, 'Todo marked as complete!')
     return redirect('todo')
 
+@ratelimit(key='ip', rate='10/m', block=True)
 @login_required
 def add_subtask(request, todo_id):
     """Add a subtask to a todo"""
@@ -243,6 +257,7 @@ def add_subtask(request, todo_id):
         messages.success(request, 'Subtask added!')
     return redirect('todo')
 
+@ratelimit(key='ip', rate='10/m', block=True)
 @login_required
 def toggle_subtask(request, id):
     """Toggle subtask completion"""
@@ -285,6 +300,7 @@ def conversion(request):
     context = {'conversions': conversions}
     return render(request, 'dashboard/conversion.html', context)
 
+@ratelimit(key='ip', rate='30/m', block=True)
 def youtube_search(request):
     """YouTube search view"""
     query = request.GET.get('query')
@@ -300,6 +316,7 @@ def youtube_search(request):
     context = {'query': query, 'videos': videos}
     return render(request, 'dashboard/youtube.html', context)
 
+@ratelimit(key='ip', rate='30/m', block=True)
 def wiki_search(request):
     """Wikipedia search view"""
     query = request.GET.get('query')
@@ -335,6 +352,7 @@ def calendar_view(request):
     }
     return render(request, 'dashboard/calendar.html', context)
 
+@ratelimit(key='ip', rate='30/m', block=True)
 @login_required
 def study_sessions(request):
     """View study sessions"""
@@ -350,6 +368,7 @@ def study_sessions(request):
     page_obj = paginator.get_page(page_number)
     return render(request, 'dashboard/study_sessions.html', {'page_obj': page_obj, 'query': q, 'total_time': total_time})
 
+@ratelimit(key='ip', rate='10/m', block=True)
 @login_required
 def add_study_session(request):
     """Add a study session"""

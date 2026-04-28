@@ -140,6 +140,35 @@
             }
           });
         });
+
+        // Swipe gestures for todo cards
+        let touchStartX = 0;
+        let touchEndX = 0;
+        const swipeThreshold = 50; // px
+        document.querySelectorAll('.todo-card').forEach(function(card) {
+          card.addEventListener('touchstart', function(e) {
+            touchStartX = e.changedTouches[0].screenX;
+          });
+          card.addEventListener('touchend', function(e) {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe(card);
+          });
+        });
+
+        function handleSwipe(card) {
+          const diff = touchEndX - touchStartX;
+          if (Math.abs(diff) > swipeThreshold) {
+            if (diff > 0) {
+              // Swipe right -> Edit
+              const editBtn = card.querySelector('.edit-todo');
+              if (editBtn) window.location = editBtn.href;
+            } else {
+              // Swipe left -> Mark complete
+              const completeBtn = card.querySelector('.mark-complete');
+              if (completeBtn) window.location = completeBtn.href;
+            }
+          }
+        }
       });
     </script>
     <!-- Loading Spinner (centered overlay) -->

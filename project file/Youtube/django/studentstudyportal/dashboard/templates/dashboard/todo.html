@@ -19,7 +19,7 @@
     <div class="row">
         {% for t in page_obj %}
         <div class="col-md-4 mb-4">
-            <div class="card {% if not t.completed and t.due_date and t.due_date < today %}border-danger{% endif %}">
+            <div class="card todo-card {% if not t.completed and t.due_date and t.due_date < today %}border-danger{% endif %}" data-todo-id="{{ t.id }}">
                 <div class="card-body">
                     <h5 class="card-title">{{ t.title }}</h5>
                     <p class="card-text">{{ t.description }}</p>
@@ -58,8 +58,8 @@
                         </div>
                     </form>
                     {% if not t.completed %}
-                    <a href="{% url 'edit_todo' t.id %}" class="btn btn-warning mr-2">Edit</a>
-                    <a href="{% url 'mark_todo_complete' t.id %}" class="btn btn-success">Mark Complete</a>
+                    <a href="{% url 'edit_todo' t.id %}" class="btn btn-warning mr-2 edit-todo">Edit</a>
+                    <a href="{% url 'mark_todo_complete' t.id %}" class="btn btn-success mark-complete">Mark Complete</a>
                     {% else %}
                     <span class="badge badge-success">Completed</span>
                     {% endif %}

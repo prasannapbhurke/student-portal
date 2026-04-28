@@ -12,6 +12,9 @@ class Note(models.Model):
     
     class Meta:
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user', 'created_at']),
+        ]
     
     def __str__(self):
         return self.title
@@ -34,6 +37,10 @@ class Homework(models.Model):
     
     class Meta:
         ordering = ['deadline']
+        indexes = [
+            models.Index(fields=['user', 'deadline']),
+            models.Index(fields=['status', 'deadline']),
+        ]
     
     def __str__(self):
         return f"{self.title} - {self.subject}"
@@ -75,6 +82,10 @@ class Todo(models.Model):
     
     class Meta:
         ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user', 'due_date']),
+            models.Index(fields=['completed']),
+        ]
     
     def __str__(self):
         return self.title
@@ -141,9 +152,12 @@ class StudySession(models.Model):
     duration = models.PositiveIntegerField(help_text="Duration in minutes")
     date = models.DateField(default=timezone.now)
     notes = models.TextField(blank=True)
-
+    
     class Meta:
         ordering = ['-date']
+        indexes = [
+            models.Index(fields=['user', 'date']),
+        ]
 
     def __str__(self):
         return f"{self.subject} - {self.duration} min"
