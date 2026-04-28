@@ -26,4 +26,7 @@ urlpatterns = [
     path('calendar/', views.calendar_view, name='calendar'),
     path('study-sessions/', views.study_sessions, name='study_sessions'),
     path('add-study-session/', views.add_study_session, name='add_study_session'),
+    path('timer/', views.timer, name='timer'),
+    path('flashcards/', views.flashcards, name='flashcards'),
+    path('quizzes/', views.quizzes, name='quizzes'),
 ]

@@ -4,7 +4,9 @@ from django.contrib import messages
 from django.utils import timezone
 from django.db import models
 from django.http import HttpResponse
+from django.conf import settings
 import csv
+import requests
 from .models import Note, Homework, Todo, Subtask, Book, DictionaryEntry, ConversionEntry, StudySession
 
 def home(request):
@@ -78,6 +80,20 @@ def dashboard(request):
         'total_session_time': total_session_time,
     }
     return render(request, 'dashboard/dashboard.html', context)
+
+def timer(request):
+    """Study timer"""
+    return render(request, 'dashboard/timer.html')
+
+def flashcards(request):
+    """Flashcard decks"""
+    # Placeholder for now
+    return render(request, 'dashboard/flashcards.html')
+
+def quizzes(request):
+    """Quiz builder"""
+    # Placeholder
+    return render(request, 'dashboard/quizzes.html')
 
 def add_note(request):
     """Add a new note"""
@@ -271,11 +287,33 @@ def conversion(request):
 
 def youtube_search(request):
     """YouTube search view"""
-    return render(request, 'dashboard/youtube.html')
+    query = request.GET.get('query')
+    videos = []
+    if query and settings.YOUTUBE_API_KEY:
+        try:
+            response = requests.get(f'https://www.googleapis.com/youtube/v3/search?part=snippet&q={query}&type=video&key={settings.YOUTUBE_API_KEY}&maxResults=5', timeout=5)
+            if response.status_code == 200:
+                data = response.json()
+                videos = data.get('items', [])
+        except:
+            pass
+    context = {'query': query, 'videos': videos}
+    return render(request, 'dashboard/youtube.html', context)
 
 def wiki_search(request):
     """Wikipedia search view"""
-    return render(request, 'dashboard/wiki.html')
+    query = request.GET.get('query')
+    summary = None
+    if query:
+        try:
+            response = requests.get(f'https://en.wikipedia.org/api/rest_v1/page/summary/{query}', timeout=5)
+            if response.status_code == 200:
+                data = response.json()
+                summary = data.get('extract')
+        except:
+            summary = "Error fetching data."
+    context = {'query': query, 'summary': summary}
+    return render(request, 'dashboard/wiki.html', context)
 
 def calendar_view(request):
     """Calendar view for homework and todos"""

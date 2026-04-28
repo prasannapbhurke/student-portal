@@ -11,13 +11,19 @@
         </div>
         <button type="submit" class="btn btn-dark">Search</button>
     </form>
-    {% if request.GET.query %}
-    <div class="alert alert-info">
-        <h5>Wikipedia Page</h5>
-        <p>Click the link below to view the Wikipedia page:</p>
-        <a href="https://en.wikipedia.org/wiki/{{ request.GET.query|urlencode }}" target="_blank" class="btn btn-dark">
-            <i class="fab fa-wikipedia-w"></i> Open Wikipedia Page
-        </a>
+    {% if query %}
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">{{ query }}</h5>
+            {% if summary %}
+            <p class="card-text">{{ summary }}</p>
+            <a href="https://en.wikipedia.org/wiki/{{ query|urlencode }}" target="_blank" class="btn btn-dark">
+                <i class="fab fa-wikipedia-w"></i> View Full Page
+            </a>
+            {% else %}
+            <p class="card-text">No summary found. Try a different query.</p>
+            {% endif %}
+        </div>
     </div>
     {% endif %}
 </div>

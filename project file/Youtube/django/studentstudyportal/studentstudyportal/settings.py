@@ -94,6 +94,9 @@ LOGOUT_REDIRECT_URL = '/'
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
+# API Keys
+YOUTUBE_API_KEY = os.environ.get('YOUTUBE_API_KEY')
+
 
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
