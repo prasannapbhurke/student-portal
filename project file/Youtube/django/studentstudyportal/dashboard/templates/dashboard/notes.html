@@ -5,17 +5,29 @@
 <div class="container">
     <h2 class="mt-4">Notes</h2>
     <div class="d-flex justify-content-between mb-3">
-        <a href="{% url 'add_note' %}" class="btn btn-primary">Add Note</a>
+        <div>
+            <a href="{% url 'add_note' %}" class="btn btn-primary">Add Note</a>
+            <a href="{% url 'export_notes' %}" class="btn btn-info">Export CSV</a>
+        </div>
         <form method="get" class="form-inline">
             <input class="form-control mr-2" type="search" name="q" placeholder="Search notes..." value="{{ query }}">
+            <input class="form-control mr-2" type="date" name="date_from" value="{{ date_from }}">
+            <input class="form-control mr-2" type="date" name="date_to" value="{{ date_to }}">
             <button class="btn btn-outline-secondary" type="submit">Search</button>
         </form>
     </div>
-    <div class="row">
+    <form method="post" id="bulk-delete-form">
+        {% csrf_token %}
+        <div class="mb-3">
+            <button type="submit" name="bulk_delete" class="btn btn-danger">Delete Selected</button>
+        </div>
+        <div class="row">
+        <div class="row">
         {% for note in notes %}
         <div class="col-md-4 mb-4">
             <div class="card">
                 <div class="card-body">
+                    <input type="checkbox" name="selected_notes" value="{{ note.id }}" class="mr-2">
                     <h5 class="card-title">{{ note.title }}</h5>
                     <p class="card-text">{{ note.description }}</p>
                     <a href="{% url 'edit_note' note.id %}" class="btn btn-warning mr-2">Edit</a>
@@ -26,7 +38,8 @@
         {% empty %}
         <p>No notes yet.</p>
         {% endfor %}
-    </div>
+        </div>
+    </form>
 </div>
 
 {% endblock %}

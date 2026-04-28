@@ -1,0 +1,45 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container mt-4">
+    <h2>Progress Dashboard</h2>
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Notes</h5>
+                    <p class="card-text">{{ total_notes }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Homework</h5>
+                    <p class="card-text">{{ total_homework }} ({{ pending_homework }} pending)</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Todos</h5>
+                    <p class="card-text">{{ total_todos }} ({{ completed_todos }} completed)</p>
+                    <p>{{ completion_rate|floatformat:1 }}% done</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h5 class="card-title">Study Sessions</h5>
+                    <p class="card-text">{{ total_sessions }} sessions</p>
+                    <p>{{ total_session_time }} minutes</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

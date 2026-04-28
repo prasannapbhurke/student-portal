@@ -3,7 +3,9 @@ from . import views
 
 urlpatterns = [
     path('', views.home, name='home'),
+    path('dashboard/', views.dashboard, name='dashboard'),
     path('notes/', views.notes, name='notes'),
+    path('export-notes/', views.export_notes, name='export_notes'),
     path('add-note/', views.add_note, name='add_note'),
     path('edit-note/<int:id>/', views.edit_note, name='edit_note'),
     path('delete-note/<int:id>/', views.delete_note, name='delete_note'),

@@ -3,6 +3,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils import timezone
 from django.db import models
+from django.http import HttpResponse
+import csv
 from .models import Note, Homework, Todo, Subtask, Book, DictionaryEntry, ConversionEntry, StudySession
 
 def home(request):
@@ -24,10 +26,58 @@ def notes(request):
     user = request.user if request.user.is_authenticated else None
     notes = Note.objects.filter(user=user) if user else Note.objects.filter(user__isnull=True)
     q = request.GET.get('q')
+    date_from = request.GET.get('date_from')
+    date_to = request.GET.get('date_to')
     if q:
-        notes = notes.filter(title__icontains=q) | notes.filter(description__icontains=q)
-    context = {'notes': notes, 'query': q}
+        notes = notes.filter(models.Q(title__icontains=q) | models.Q(description__icontains=q))
+    if date_from:
+        notes = notes.filter(created_at__date__gte=date_from)
+    if date_to:
+        notes = notes.filter(created_at__date__lte=date_to)
+    if request.method == 'POST' and 'bulk_delete' in request.POST:
+        selected_ids = request.POST.getlist('selected_notes')
+        if selected_ids:
+            notes.filter(id__in=selected_ids).delete()
+            messages.success(request, f'Deleted {len(selected_ids)} notes.')
+            return redirect('notes')
+    context = {'notes': notes, 'query': q, 'date_from': date_from, 'date_to': date_to}
     return render(request, 'dashboard/notes.html', context)
+
+def export_notes(request):
+    """Export notes to CSV"""
+    user = request.user if request.user.is_authenticated else None
+    notes = Note.objects.filter(user=user) if user else Note.objects.filter(user__isnull=True)
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="notes.csv"'
+    writer = csv.writer(response)
+    writer.writerow(['Title', 'Description', 'Created At'])
+    for note in notes:
+        writer.writerow([note.title, note.description, note.created_at])
+    return response
+
+def dashboard(request):
+    """Progress dashboard"""
+    user = request.user if request.user.is_authenticated else None
+    if not user:
+        return redirect('account_login')
+    total_notes = Note.objects.filter(user=user).count()
+    total_homework = Homework.objects.filter(user=user).count()
+    pending_homework = Homework.objects.filter(user=user, status='pending').count()
+    total_todos = Todo.objects.filter(user=user).count()
+    completed_todos = Todo.objects.filter(user=user, completed=True).count()
+    total_sessions = StudySession.objects.filter(user=user).count()
+    total_session_time = StudySession.objects.filter(user=user).aggregate(total=models.Sum('duration'))['total'] or 0
+    context = {
+        'total_notes': total_notes,
+        'total_homework': total_homework,
+        'pending_homework': pending_homework,
+        'total_todos': total_todos,
+        'completed_todos': completed_todos,
+        'completion_rate': (completed_todos / total_todos * 100) if total_todos > 0 else 0,
+        'total_sessions': total_sessions,
+        'total_session_time': total_session_time,
+    }
+    return render(request, 'dashboard/dashboard.html', context)
 
 def add_note(request):
     """Add a new note"""
