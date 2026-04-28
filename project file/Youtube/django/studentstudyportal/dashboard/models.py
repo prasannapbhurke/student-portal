@@ -161,3 +161,18 @@ class StudySession(models.Model):
 
     def __str__(self):
         return f"{self.subject} - {self.duration} min"
+
+class Export(models.Model):
+    """Model to store asynchronous export tasks"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    csv_data = models.TextField(blank=True)  # store CSV content as text
+    created_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=[
+        ('pending', 'Pending'),
+        ('ready', 'Ready'),
+        ('failed', 'Failed')
+    ], default='pending')
+    error_message = models.TextField(blank=True)
+
+    def __str__(self):
+        return f"Export by {self.user.username} at {self.created_at}"

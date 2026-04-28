@@ -27,11 +27,19 @@
         </button>
          <div class="collapse navbar-collapse justify-content-end" id="navbarSupportedContent">
            <ul class="navbar-nav mb-2 mb-lg-0">
-             <li class="nav-item">
-               <button id="theme-toggle" class="btn btn-outline-secondary mr-2">
-                 <i class="fas fa-moon"></i> Dark Mode
-               </button>
-             </li>
+              <li class="nav-item">
+                <button id="theme-toggle" class="btn btn-outline-secondary mr-2">
+                  <i class="fas fa-moon"></i> Dark Mode
+                </button>
+              </li>
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="themeDropdown" role="button" data-toggle="dropdown">Theme</a>
+                <div class="dropdown-menu" aria-labelledby="themeDropdown">
+                  <a class="dropdown-item" href="#" data-theme="default">Default</a>
+                  <a class="dropdown-item" href="#" data-theme="blue">Blue</a>
+                  <a class="dropdown-item" href="#" data-theme="green">Green</a>
+                </div>
+              </li>
              <li class="nav-item">
                <a class="nav-link active" aria-current="page" href="#">Home</a>
              </li>
@@ -169,6 +177,27 @@
             }
           }
         }
+
+        // Theme switcher
+        document.querySelectorAll('[data-theme]').forEach(item => {
+          item.addEventListener('click', function(e) {
+            e.preventDefault();
+            const theme = this.getAttribute('data-theme');
+            // remove existing theme classes
+            document.body.classList.remove('theme-blue', 'theme-green');
+            if (theme !== 'default') {
+              document.body.classList.add('theme-' + theme);
+            }
+            localStorage.setItem('theme', theme);
+          });
+        });
+        // Load saved theme
+        (function() {
+          const saved = localStorage.getItem('theme') || 'default';
+          if (saved !== 'default') {
+            document.body.classList.add('theme-' + saved);
+          }
+        })();
       });
     </script>
     <!-- Loading Spinner (centered overlay) -->

@@ -8,6 +8,7 @@
         <div>
             <a href="{% url 'add_note' %}" class="btn btn-primary">Add Note</a>
             <a href="{% url 'export_notes' %}" class="btn btn-info">Export CSV</a>
+            <a href="{% url 'export_list' %}" class="btn btn-secondary">View Exports</a>
         </div>
         <form method="get" class="form-inline">
             <input class="form-control mr-2" type="search" name="q" placeholder="Search notes..." value="{{ query }}">

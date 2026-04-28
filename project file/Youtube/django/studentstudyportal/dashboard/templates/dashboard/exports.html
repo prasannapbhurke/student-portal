@@ -1,0 +1,46 @@
+{% extends 'dashboard/base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container mt-4">
+    <h2>My Exports</h2>
+    {% if exports %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Created At</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for exp in exports %}
+            <tr>
+                <td>{{ exp.id }}</td>
+                <td>{{ exp.created_at|date:"Y-m-d H:i" }}</td>
+                <td>
+                    {% if exp.status == 'pending' %}Pending{% endif %}
+                    {% if exp.status == 'ready' %}Ready{% endif %}
+                    {% if exp.status == 'failed' %}Failed{% endif %}
+                </td>
+                <td>
+                    {% if exp.status == 'ready' %}
+                    <a href="{% url 'download_export' exp.id %}" class="btn btn-success btn-sm">Download CSV</a>
+                    {% elif exp.status == 'failed' %}
+                    <span class="text-danger">Failed: {{ exp.error_message }}</span>
+                    {% else %}
+                    <em>Processing...</em>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>No exports yet.</p>
+    {% endif %}
+    <a href="{% url 'notes' %}" class="btn btn-secondary">Back to Notes</a>
+</div>
+
+{% endblock %}

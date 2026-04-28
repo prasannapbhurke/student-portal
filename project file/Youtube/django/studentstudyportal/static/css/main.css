@@ -268,3 +268,21 @@ h1, h2, h3, h4, h5, h6 {
         color: #e0e0e0;
     }
 }
+
+/* Theme customization */
+.theme-blue .btn-primary {
+    background-color: #0056b3 !important;
+    border-color: #0056b3 !important;
+}
+.theme-blue .card-header {
+    background-color: #0056b3 !important;
+    color: white !important;
+}
+.theme-green .btn-primary {
+    background-color: #28a745 !important;
+    border-color: #28a745 !important;
+}
+.theme-green .card-header {
+    background-color: #28a745 !important;
+    color: white !important;
+}

@@ -8,8 +8,9 @@ from django.conf import settings
 from django_ratelimit.decorators import ratelimit
 import csv
 import requests
-from .models import Note, Homework, Todo, Subtask, Book, DictionaryEntry, ConversionEntry, StudySession
+from .models import Note, Homework, Todo, Subtask, Book, DictionaryEntry, ConversionEntry, StudySession, Export
 from .forms import NoteForm, HomeworkForm, TodoForm, SubtaskForm, StudySessionForm
+from .tasks import generate_notes_export
 
 def home(request):
     """Home page with feature overview"""
@@ -54,17 +55,14 @@ def notes(request):
     context = {'page_obj': page_obj, 'query': q, 'date_from': date_from, 'date_to': date_to}
     return render(request, 'dashboard/notes.html', context)
 
+@ratelimit(key='ip', rate='10/m', block=True)
+@login_required
 def export_notes(request):
-    """Export notes to CSV"""
-    user = request.user if request.user.is_authenticated else None
-    notes = Note.objects.filter(user=user) if user else Note.objects.filter(user__isnull=True)
-    response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename="notes.csv"'
-    writer = csv.writer(response)
-    writer.writerow(['Title', 'Description', 'Created At'])
-    for note in notes:
-        writer.writerow([note.title, note.description, note.created_at])
-    return response
+    """Trigger asynchronous export of notes to CSV"""
+    export = Export.objects.create(user=request.user, status='pending')
+    generate_notes_export.delay(export.id)
+    messages.info(request, 'Your export is being processed. Visit the Exports page to download when ready.')
+    return redirect('notes')
 
 @login_required
 def dashboard(request):
@@ -380,3 +378,21 @@ def add_study_session(request):
         messages.success(request, 'Study session added!')
         return redirect('study_sessions')
     return render(request, 'dashboard/add_study_session.html', {'form': form})
+
+@login_required
+def export_list(request):
+    """List all exports for the user"""
+    exports = Export.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'dashboard/exports.html', {'exports': exports})
+
+@login_required
+def download_export(request, id):
+    """Download a completed export"""
+    export = get_object_or_404(Export, id=id, user=request.user)
+    if export.status != 'ready':
+        messages.warning(request, 'Export not ready yet.')
+        return redirect('export_list')
+    response = HttpResponse(export.csv_data, content_type='text/csv')
+    filename = f'notes_{request.user.username}_{export.id}.csv'
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    return response
