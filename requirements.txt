@@ -7,3 +7,4 @@ django-crispy-forms
 django-ratelimit
 celery[redis]
 django-celery-results
+requests
