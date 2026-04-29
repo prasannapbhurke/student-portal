@@ -89,11 +89,16 @@
        </div>
      </nav>
    </header>
-  <br /><br />
-  <main>
+   <br /><br />
+   <main>
+    {% if messages %}
+        {% for message in messages %}
+        <div class="container"><div class="alert alert-{{ message.tags }} mt-3">{{ message }}</div></div>
+        {% endfor %}
+    {% endif %}
 
-    {% block content %}
-    {% endblock content %}
+     {% block content %}
+     {% endblock content %}
 
    </main>
    <footer class="bg-dark text-white mt-5 py-4">
