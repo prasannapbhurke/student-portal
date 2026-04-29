@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.contrib.auth.forms import UserCreationForm
 from django.utils import timezone
 from django.db import models
 from django.http import HttpResponse
@@ -24,6 +25,18 @@ def home(request):
         'sessions_count': StudySession.objects.filter(user=user).count() if user else StudySession.objects.filter(user__isnull=True).count(),
     }
     return render(request, 'dashboard/home.html', context)
+
+def signup(request):
+    """User registration"""
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Account created! You can now log in.')
+            return redirect('login')
+    else:
+        form = UserCreationForm()
+    return render(request, 'dashboard/signup.html', {'form': form})
 
 
 @login_required
