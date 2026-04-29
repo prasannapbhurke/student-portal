@@ -362,12 +362,21 @@ def wiki_search(request):
     if query:
         try:
             encoded = urllib.parse.quote(query)
-            response = requests.get(f'https://en.wikipedia.org/api/rest_v1/page/summary/{encoded}', timeout=5)
+            headers = {
+                'User-Agent': 'StudentStudyPortal/1.0 (https://github.com/your-repo; contact@example.com)'
+            }
+            response = requests.get(
+                f'https://en.wikipedia.org/api/rest_v1/page/summary/{encoded}',
+                headers=headers,
+                timeout=5
+            )
             if response.status_code == 200:
                 data = response.json()
                 summary = data.get('extract')
             elif response.status_code == 404:
                 summary = None  # No article found
+            elif response.status_code == 403:
+                error_message = "Wikipedia API access denied. This may be due to rate limiting. Please try again later."
             else:
                 error_message = f"Wikipedia API error: {response.status_code}"
         except Exception as e:
