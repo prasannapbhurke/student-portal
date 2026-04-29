@@ -1,11 +1,11 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.contrib.auth.forms import UserCreationForm
 from django.utils import timezone
 from django.db import models
 from django.http import HttpResponse
 from django.conf import settings
+from django.contrib.auth.models import User
 import csv
 import requests
 from .models import Note, Homework, Todo, Subtask, Book, DictionaryEntry, ConversionEntry, StudySession, Export
@@ -29,14 +29,21 @@ def home(request):
 def signup(request):
     """User registration"""
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Account created! You can now log in.')
-            return redirect('login')
-    else:
-        form = UserCreationForm()
-    return render(request, 'dashboard/signup.html', {'form': form})
+        username = request.POST.get('username')
+        password1 = request.POST.get('password1')
+        password2 = request.POST.get('password2')
+        if not username or not password1 or not password2:
+            messages.error(request, 'All fields are required.')
+        elif password1 != password2:
+            messages.error(request, 'Passwords do not match.')
+        else:
+            try:
+                User.objects.create_user(username=username, password=password1)
+                messages.success(request, 'Account created! You can now log in.')
+                return redirect('login')
+            except Exception as e:
+                messages.error(request, f'Error: {e}')
+    return render(request, 'dashboard/signup.html')
 
 
 @login_required
