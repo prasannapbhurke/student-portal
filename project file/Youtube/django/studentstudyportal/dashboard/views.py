@@ -32,11 +32,15 @@ def signup(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
-            form.save()
-            messages.success(request, 'Account created! You can now log in.')
-            return redirect('login')
+            try:
+                form.save()
+                messages.success(request, 'Account created! You can now log in.')
+                return redirect('login')
+            except Exception as e:
+                messages.error(request, f'Error creating account: {e}')
+                return render(request, 'dashboard/signup.html', {'form': form})
         else:
-            # Form will have errors; render with errors
+            # Form has errors; render with errors
             return render(request, 'dashboard/signup.html', {'form': form})
     else:
         form = UserCreationForm()
