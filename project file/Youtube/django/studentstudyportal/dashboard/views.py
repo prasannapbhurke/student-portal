@@ -9,6 +9,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 import csv
 import requests
+import urllib.parse
 from .models import Note, Homework, Todo, Subtask, Book, DictionaryEntry, ConversionEntry, StudySession, Export
 from .forms import NoteForm, HomeworkForm, TodoForm, SubtaskForm, StudySessionForm
 from .tasks import generate_notes_export
@@ -171,7 +172,7 @@ def delete_note(request, id):
 def homework(request):
     """View all homework"""
     user = request.user
-    homeworks = Homework.objects.filter(user=user).order_by('due_date')
+    homeworks = Homework.objects.filter(user=user).order_by('deadline')
     q = request.GET.get('q')
     status = request.GET.get('status')
     if q:

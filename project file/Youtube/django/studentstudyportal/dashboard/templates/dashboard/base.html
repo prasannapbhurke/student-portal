@@ -188,6 +188,20 @@
             localStorage.setItem('theme', theme);
           });
         });
+        // Hide loading spinner on page load
+        window.addEventListener('load', function() {
+          const spinner = document.getElementById('loading-spinner');
+          if (spinner) {
+            spinner.style.display = 'none';
+          }
+        });
+        // Also hide spinner on page hide/unload (back button)
+        window.addEventListener('pagehide', function() {
+          const spinner = document.getElementById('loading-spinner');
+          if (spinner) {
+            spinner.style.display = 'none';
+          }
+        });
         // Load saved theme
         (function() {
           const saved = localStorage.getItem('theme') || 'default';
@@ -195,8 +209,19 @@
             document.body.classList.add('theme-' + saved);
           }
         })();
-      });
-    </script>
+       });
+
+       // Hide loading spinner on page load/back navigation
+       function hideSpinner() {
+         const spinner = document.getElementById('loading-spinner');
+         if (spinner) {
+           spinner.style.display = 'none';
+         }
+       }
+       window.addEventListener('load', hideSpinner);
+       window.addEventListener('pageshow', hideSpinner);  // Back/forward cache
+     });
+     </script>
     <!-- Loading Spinner (centered overlay) -->
     <div id="loading-spinner" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.8); z-index:9999; align-items:center; justify-content:center;">
       <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center;">
