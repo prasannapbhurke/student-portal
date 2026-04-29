@@ -360,7 +360,6 @@ def wiki_search(request):
     error_message = None
     if query:
         try:
-            import urllib.parse
             encoded = urllib.parse.quote(query)
             response = requests.get(f'https://en.wikipedia.org/api/rest_v1/page/summary/{encoded}', timeout=5)
             if response.status_code == 200:

@@ -146,3 +146,6 @@ CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = TIME_ZONE
+
+# YouTube API Key (required for YouTube search feature)
+YOUTUBE_API_KEY = os.environ.get('YOUTUBE_API_KEY', '')
