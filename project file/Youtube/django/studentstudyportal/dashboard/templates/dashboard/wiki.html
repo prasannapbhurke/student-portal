@@ -15,14 +15,19 @@
     <div class="card">
         <div class="card-body">
             <h5 class="card-title">{{ query }}</h5>
-            {% if summary %}
-            <p class="card-text">{{ summary }}</p>
-            <a href="https://en.wikipedia.org/wiki/{{ query|urlencode }}" target="_blank" class="btn btn-dark">
-                <i class="fab fa-wikipedia-w"></i> View Full Page
-            </a>
+            {% if error_message %}
+                <div class="alert alert-warning">{{ error_message }}</div>
+            {% elif summary %}
+                <p class="card-text">{{ summary }}</p>
+                <a href="https://en.wikipedia.org/wiki/{{ query|urlencode }}" target="_blank" class="btn btn-dark">
+                    <i class="fab fa-wikipedia-w"></i> View Full Page
+                </a>
             {% else %}
-            <p class="card-text">No summary found. Try a different query.</p>
+                <p class="card-text">No summary found. Try a different query.</p>
             {% endif %}
+        </div>
+    </div>
+    {% endif %}
         </div>
     </div>
     {% endif %}

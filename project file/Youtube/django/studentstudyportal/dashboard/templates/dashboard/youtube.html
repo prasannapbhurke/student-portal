@@ -13,7 +13,9 @@
     </form>
     {% if query %}
     <h5>Search Results for "{{ query }}"</h5>
-    {% if videos %}
+    {% if error_message %}
+        <div class="alert alert-warning">{{ error_message }}</div>
+    {% elif videos %}
         <div class="row">
         {% for video in videos %}
         <div class="col-md-6 mb-4">
@@ -28,7 +30,7 @@
         {% endfor %}
     </div>
     {% else %}
-    <p>No videos found or API key not set.</p>
+    <p>No videos found. Try a different query or check API key.</p>
     {% endif %}
     {% endif %}
 </div>
