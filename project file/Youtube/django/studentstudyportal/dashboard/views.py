@@ -379,11 +379,11 @@ def calendar_view(request):
     """Calendar view for homework and todos"""
     user = request.user
     today = timezone.now().date()
-    upcoming_homework = Homework.objects.filter(user=user, due_date__gte=today).order_by('due_date')
+    upcoming_homework = Homework.objects.filter(user=user, deadline__gte=today).order_by('deadline')
     upcoming_todos = Todo.objects.filter(user=user, due_date__gte=today, completed=False).order_by('due_date')
     events = []
     for h in upcoming_homework:
-        events.append({'title': f'Homework: {h.title}', 'start': h.due_date.isoformat(), 'color': '#dc3545'})
+        events.append({'title': f'Homework: {h.title}', 'start': h.deadline.isoformat(), 'color': '#dc3545'})
     for t in upcoming_todos:
         events.append({'title': f'Todo: {t.title}', 'start': t.due_date.isoformat(), 'color': '#007bff'})
     context = {
