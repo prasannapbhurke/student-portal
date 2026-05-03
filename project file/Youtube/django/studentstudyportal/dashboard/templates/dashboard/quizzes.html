@@ -2,9 +2,127 @@
 {% load static %}
 {% block content %}
 
-<div class="container mt-4">
+<div class="container mt-4 study-tool-page">
     <h2>Quiz Builder</h2>
-    <p>Feature coming soon: Build and take quizzes.</p>
+    <p class="search-page-copy">Use a simple local quiz format: one question per line as <strong>question | option A | option B | option C | correct option number</strong>.</p>
+
+    <div class="row">
+        <div class="col-lg-5 mb-4">
+            <div class="card">
+                <div class="card-body">
+                    <label for="quiz-input"><strong>Question Set</strong></label>
+                    <textarea id="quiz-input" class="form-control mb-3">Capital of India? | Delhi | Mumbai | Chennai | 1
+2 + 2 = ? | 3 | 4 | 5 | 2
+Python is a? | Language | Browser | Database | 1</textarea>
+                    <button type="button" class="btn btn-primary" id="load-quiz">Load Quiz</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-7 mb-4">
+            <div class="card quiz-stage">
+                <div class="card-body">
+                    <div class="flashcard-meta">
+                        <span id="quiz-progress">Question 1 of 1</span>
+                        <span id="quiz-score">Score: 0</span>
+                    </div>
+                    <h3 id="quiz-question" class="mb-4">Capital of India?</h3>
+                    <div id="quiz-options" class="quiz-options"></div>
+                    <div class="flashcard-actions">
+                        <button type="button" class="btn btn-outline-primary" id="quiz-next">Next Question</button>
+                        <button type="button" class="btn btn-outline-secondary" id="quiz-reset">Restart Quiz</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const input = document.getElementById('quiz-input');
+    const loadButton = document.getElementById('load-quiz');
+    const question = document.getElementById('quiz-question');
+    const options = document.getElementById('quiz-options');
+    const progress = document.getElementById('quiz-progress');
+    const score = document.getElementById('quiz-score');
+    const nextButton = document.getElementById('quiz-next');
+    const resetButton = document.getElementById('quiz-reset');
+
+    let quiz = [];
+    let currentIndex = 0;
+    let correctAnswers = 0;
+    let answered = false;
+
+    function parseQuiz() {
+        quiz = input.value
+            .split('\n')
+            .map((line) => line.split('|').map((part) => part.trim()))
+            .filter((parts) => parts.length >= 5)
+            .map((parts) => ({
+                question: parts[0],
+                options: parts.slice(1, 4),
+                answer: Number(parts[4]) - 1,
+            }))
+            .filter((item) => item.question && item.options.every(Boolean) && item.answer >= 0);
+
+        if (!quiz.length) {
+            quiz = [{
+                question: 'Add valid quiz lines to begin.',
+                options: ['Option A', 'Option B', 'Option C'],
+                answer: 0,
+            }];
+        }
+
+        currentIndex = 0;
+        correctAnswers = 0;
+        answered = false;
+        renderQuestion();
+    }
+
+    function renderQuestion() {
+        const item = quiz[currentIndex];
+        answered = false;
+        question.textContent = item.question;
+        progress.textContent = `Question ${currentIndex + 1} of ${quiz.length}`;
+        score.textContent = `Score: ${correctAnswers}`;
+        options.innerHTML = '';
+
+        item.options.forEach(function(optionText, index) {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'btn btn-outline-primary quiz-option';
+            button.textContent = optionText;
+            button.addEventListener('click', function() {
+                if (answered) return;
+                answered = true;
+                if (index === item.answer) {
+                    correctAnswers += 1;
+                    button.classList.remove('btn-outline-primary');
+                    button.classList.add('btn-success');
+                } else {
+                    button.classList.remove('btn-outline-primary');
+                    button.classList.add('btn-danger');
+                    const correctButton = options.children[item.answer];
+                    if (correctButton) {
+                        correctButton.classList.remove('btn-outline-primary');
+                        correctButton.classList.add('btn-success');
+                    }
+                }
+                score.textContent = `Score: ${correctAnswers}`;
+            });
+            options.appendChild(button);
+        });
+    }
+
+    loadButton.addEventListener('click', parseQuiz);
+    nextButton.addEventListener('click', function() {
+        currentIndex = (currentIndex + 1) % quiz.length;
+        renderQuestion();
+    });
+    resetButton.addEventListener('click', parseQuiz);
+
+    parseQuiz();
+});
+</script>
 
 {% endblock %}

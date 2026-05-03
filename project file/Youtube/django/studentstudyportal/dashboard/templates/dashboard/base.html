@@ -14,14 +14,14 @@
     integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous" />
   <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css"
     integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous" />
-  <link rel="stylesheet" href="{% static 'css/main.css' %}" />
+  <link rel="stylesheet" href="{% static 'css/main.css' %}?v=20260503c" />
 </head>
 
 <body>
   <header>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
       <div class="container-fluid">
-        <a class="navbar-brand" href="#">Student Study Portal</a>        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+        <a class="navbar-brand" href="{% url 'home' %}">Student Study Portal</a>        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
           aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
@@ -32,12 +32,11 @@
                   <i class="fas fa-moon"></i> Dark Mode
                 </button>
               </li>
-              <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="themeDropdown" role="button" data-toggle="dropdown">Theme</a>
-                <div class="dropdown-menu" aria-labelledby="themeDropdown">
-                  <a class="dropdown-item" href="#" data-theme="default">Default</a>
-                  <a class="dropdown-item" href="#" data-theme="blue">Blue</a>
-                  <a class="dropdown-item" href="#" data-theme="green">Green</a>
+              <li class="nav-item">
+                <div class="theme-switcher" aria-label="Theme switcher">
+                  <button type="button" class="theme-chip theme-chip-default" data-theme="default">Default</button>
+                  <button type="button" class="theme-chip theme-chip-blue" data-theme="blue">Blue</button>
+                  <button type="button" class="theme-chip theme-chip-green" data-theme="green">Green</button>
                 </div>
               </li>
              <li class="nav-item">
@@ -50,8 +49,11 @@
              <li class="nav-item">
                <a class="nav-link" href="#">{{ user.username }}</a>
              </li>
-               <li class="nav-item">
-                 <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+               <li class="nav-item nav-logout-item">
+                 <form method="post" action="{% url 'logout' %}" class="logout-form">
+                   {% csrf_token %}
+                   <button type="submit" class="nav-link nav-link-button">Logout</button>
+                 </form>
                </li>
                 {% else %}
                 <li class="nav-item">
@@ -90,7 +92,7 @@
      </nav>
    </header>
    <br /><br />
-   <main>
+   <main class="page-shell">
     {% if messages %}
         {% for message in messages %}
         <div class="container"><div class="alert alert-{{ message.tags }} mt-3">{{ message }}</div></div>
@@ -114,20 +116,65 @@
     integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
    </script>
     <script>
-      document.getElementById('theme-toggle').addEventListener('click', function() {
-        document.body.classList.toggle('dark-mode');
-        const icon = this.querySelector('i');
-        if (document.body.classList.contains('dark-mode')) {
-          icon.className = 'fas fa-sun';
-          this.innerHTML = '<i class="fas fa-sun"></i> Light Mode';
-        } else {
-          icon.className = 'fas fa-moon';
-          this.innerHTML = '<i class="fas fa-moon"></i> Dark Mode';
-        }
-      });
-
-      // Confirm dialogs for delete links
       document.addEventListener('DOMContentLoaded', function() {
+        const body = document.body;
+        const themeToggle = document.getElementById('theme-toggle');
+        const spinner = document.getElementById('loading-spinner');
+        const themeClassNames = ['theme-blue', 'theme-green'];
+        const themeButtons = document.querySelectorAll('[data-theme]');
+
+        function hideSpinner() {
+          if (spinner) {
+            spinner.style.display = 'none';
+          }
+        }
+
+        function applySavedTheme() {
+          const savedTheme = localStorage.getItem('theme') || 'default';
+          const savedMode = localStorage.getItem('dark_mode') === 'true';
+          themeClassNames.forEach(function(className) {
+            body.classList.remove(className);
+          });
+          if (savedTheme !== 'default') body.classList.add('theme-' + savedTheme);
+          body.classList.toggle('dark-mode', savedMode);
+          themeButtons.forEach(function(button) {
+            button.classList.toggle('is-active', button.getAttribute('data-theme') === savedTheme);
+          });
+          if (themeToggle) {
+            themeToggle.innerHTML = savedMode
+              ? '<i class="fas fa-sun"></i> Light Mode'
+              : '<i class="fas fa-moon"></i> Dark Mode';
+          }
+        }
+
+        applySavedTheme();
+
+        if (themeToggle) {
+          themeToggle.addEventListener('click', function() {
+            const enabled = !body.classList.contains('dark-mode');
+            body.classList.toggle('dark-mode', enabled);
+            localStorage.setItem('dark_mode', enabled ? 'true' : 'false');
+            themeToggle.innerHTML = enabled
+              ? '<i class="fas fa-sun"></i> Light Mode'
+              : '<i class="fas fa-moon"></i> Dark Mode';
+          });
+        }
+
+        themeButtons.forEach(function(item) {
+          item.addEventListener('click', function(e) {
+            e.preventDefault();
+            const theme = this.getAttribute('data-theme');
+            themeClassNames.forEach(function(className) {
+              body.classList.remove(className);
+            });
+            if (theme !== 'default') body.classList.add('theme-' + theme);
+            localStorage.setItem('theme', theme);
+            themeButtons.forEach(function(button) {
+              button.classList.toggle('is-active', button.getAttribute('data-theme') === theme);
+            });
+          });
+        });
+
         document.querySelectorAll('.confirm-delete').forEach(function(link) {
           link.addEventListener('click', function(e) {
             if (!confirm('Are you sure you want to delete this item?')) {
@@ -136,20 +183,31 @@
           });
         });
 
-        // Show loading spinner on form submit
         document.querySelectorAll('form').forEach(function(form) {
           form.addEventListener('submit', function() {
-            const spinner = document.getElementById('loading-spinner');
             if (spinner) {
               spinner.style.display = 'block';
             }
           });
         });
 
-        // Swipe gestures for todo cards
         let touchStartX = 0;
         let touchEndX = 0;
-        const swipeThreshold = 50; // px
+        const swipeThreshold = 50;
+
+        function handleSwipe(card) {
+          const diff = touchEndX - touchStartX;
+          if (Math.abs(diff) > swipeThreshold) {
+            if (diff > 0) {
+              const editBtn = card.querySelector('.edit-todo');
+              if (editBtn) window.location = editBtn.href;
+            } else {
+              const completeBtn = card.querySelector('.mark-complete');
+              if (completeBtn) window.location = completeBtn.href;
+            }
+          }
+        }
+
         document.querySelectorAll('.todo-card').forEach(function(card) {
           card.addEventListener('touchstart', function(e) {
             touchStartX = e.changedTouches[0].screenX;
@@ -160,68 +218,11 @@
           });
         });
 
-        function handleSwipe(card) {
-          const diff = touchEndX - touchStartX;
-          if (Math.abs(diff) > swipeThreshold) {
-            if (diff > 0) {
-              // Swipe right -> Edit
-              const editBtn = card.querySelector('.edit-todo');
-              if (editBtn) window.location = editBtn.href;
-            } else {
-              // Swipe left -> Mark complete
-              const completeBtn = card.querySelector('.mark-complete');
-              if (completeBtn) window.location = completeBtn.href;
-            }
-          }
-        }
-
-        // Theme switcher
-        document.querySelectorAll('[data-theme]').forEach(item => {
-          item.addEventListener('click', function(e) {
-            e.preventDefault();
-            const theme = this.getAttribute('data-theme');
-            // remove existing theme classes
-            document.body.classList.remove('theme-blue', 'theme-green');
-            if (theme !== 'default') {
-              document.body.classList.add('theme-' + theme);
-            }
-            localStorage.setItem('theme', theme);
-          });
-        });
-        // Hide loading spinner on page load
-        window.addEventListener('load', function() {
-          const spinner = document.getElementById('loading-spinner');
-          if (spinner) {
-            spinner.style.display = 'none';
-          }
-        });
-        // Also hide spinner on page hide/unload (back button)
-        window.addEventListener('pagehide', function() {
-          const spinner = document.getElementById('loading-spinner');
-          if (spinner) {
-            spinner.style.display = 'none';
-          }
-        });
-        // Load saved theme
-        (function() {
-          const saved = localStorage.getItem('theme') || 'default';
-          if (saved !== 'default') {
-            document.body.classList.add('theme-' + saved);
-          }
-        })();
-       });
-
-       // Hide loading spinner on page load/back navigation
-       function hideSpinner() {
-         const spinner = document.getElementById('loading-spinner');
-         if (spinner) {
-           spinner.style.display = 'none';
-         }
-       }
-       window.addEventListener('load', hideSpinner);
-       window.addEventListener('pageshow', hideSpinner);  // Back/forward cache
-     });
-     </script>
+        window.addEventListener('load', hideSpinner);
+        window.addEventListener('pageshow', hideSpinner);
+        window.addEventListener('pagehide', hideSpinner);
+      });
+    </script>
     <!-- Loading Spinner (centered overlay) -->
     <div id="loading-spinner" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.8); z-index:9999; align-items:center; justify-content:center;">
       <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center;">

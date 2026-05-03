@@ -11,3 +11,8 @@ All notable changes to this project will be documented in this file.
 - Made `celery`, `crispy_forms`, and `requests` optional at runtime so the project can start more reliably in lightweight local environments.
 - Added a fallback `crispy` template filter for environments where `django-crispy-forms` is not installed.
 - Added a root `README.md` with setup, run, test, and deployment instructions.
+- Updated the YouTube workflow to redirect directly to YouTube results instead of showing an in-app fallback message.
+- Updated the Wikipedia workflow to redirect to the best matching article when possible, with a search-result fallback for misspelled queries.
+- Fixed the navbar theme script and made saved theme preferences work more reliably.
+- Refreshed the homepage with a stronger hero section, quick actions, highlight cards, and improved feature-card spacing.
+- Expanded the documentation to cover themes, search behavior, and the enhanced homepage.

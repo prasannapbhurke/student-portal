@@ -2,284 +2,242 @@
 {% load static %} 
 {% block content %}
 
-<section class="container text-center">
-  <h3>Welcome{% if user.is_authenticated %} {{ user.username }}{% endif %} to Student Study Portal</h3>
-  <p class="lead">Manage your studies efficiently with our tools.</p>
-
-  <div class="row mb-4">
-    <div class="col-md-2">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">{{ notes_count }}</h5>
-          <p class="card-text">Notes</p>
+<section class="container home-dashboard">
+  <div class="home-hero card">
+    <div class="home-hero-body">
+      <div class="home-hero-copy-block">
+        <p class="home-hero-kicker">Study Smarter</p>
+        <h3>Welcome{% if user.is_authenticated %} {{ user.username }}{% endif %} to Student Study Portal</h3>
+        <p class="lead home-hero-copy">Manage classes, revision, deadlines, and quick research from one organized workspace that is built for daily study routines.</p>
+        <div class="home-hero-actions">
+          <a href="{% url 'notes' %}" class="btn btn-primary">Open Notes</a>
+          <a href="{% url 'todo' %}" class="btn btn-outline-primary home-hero-secondary">View Tasks</a>
         </div>
       </div>
-    </div>
-    <div class="col-md-2">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">{{ homework_count }}</h5>
-          <p class="card-text">Pending Homework</p>
+      <div class="home-hero-highlights">
+        <div class="home-highlight-card">
+          <span class="home-highlight-label">Focus</span>
+          <strong>{{ todo_count }}</strong>
+          <p>active tasks ready for your next study block</p>
         </div>
-      </div>
-    </div>
-    <div class="col-md-2">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">{{ todo_count }}</h5>
-          <p class="card-text">Active Todos</p>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-2">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">{{ books_count }}</h5>
-          <p class="card-text">Books</p>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-2">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">{{ dictionary_count }}</h5>
-          <p class="card-text">Dictionary Words</p>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-2">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">{{ conversions_count }}</h5>
-          <p class="card-text">Conversions</p>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-2">
-      <div class="card">
-        <div class="card-body">
-          <h5 class="card-title">{{ sessions_count }}</h5>
-          <p class="card-text">Study Sessions</p>
+        <div class="home-highlight-card">
+          <span class="home-highlight-label">Momentum</span>
+          <strong>{{ sessions_count }}</strong>
+          <p>study sessions captured inside your workspace</p>
         </div>
       </div>
     </div>
   </div>
 
-  <hr> <br>
-  <div class="row">
-    <div class="col-md-3">
-      <a href="{% url 'notes' %}">
-        <div class="card">
-          <div class="card-img-top bg-primary text-white d-flex align-items-center justify-content-center" style="height: 210px;">
-            <i class="fas fa-sticky-note fa-3x"></i>
-          </div>
+  <div class="row home-stats-row">
+    <div class="col-6 col-md-4 col-lg-3 stat-card-col">
+      <div class="card stat-card">
+        <div class="card-body">
+          <h5 class="card-title stat-value">{{ notes_count }}</h5>
+          <p class="card-text stat-label">Notes</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg-3 stat-card-col">
+      <div class="card stat-card">
+        <div class="card-body">
+          <h5 class="card-title stat-value">{{ homework_count }}</h5>
+          <p class="card-text stat-label">Pending Homework</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg-3 stat-card-col">
+      <div class="card stat-card">
+        <div class="card-body">
+          <h5 class="card-title stat-value">{{ todo_count }}</h5>
+          <p class="card-text stat-label">Active Todos</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg-3 stat-card-col">
+      <div class="card stat-card">
+        <div class="card-body">
+          <h5 class="card-title stat-value">{{ books_count }}</h5>
+          <p class="card-text stat-label">Books</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg-3 stat-card-col">
+      <div class="card stat-card">
+        <div class="card-body">
+          <h5 class="card-title stat-value">{{ dictionary_count }}</h5>
+          <p class="card-text stat-label">Dictionary Words</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg-3 stat-card-col">
+      <div class="card stat-card">
+        <div class="card-body">
+          <h5 class="card-title stat-value">{{ conversions_count }}</h5>
+          <p class="card-text stat-label">Conversions</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-6 col-md-4 col-lg-3 stat-card-col">
+      <div class="card stat-card">
+        <div class="card-body">
+          <h5 class="card-title stat-value">{{ sessions_count }}</h5>
+          <p class="card-text stat-label">Study Sessions</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="home-section-heading text-center">
+    <h4>Your Study Tools</h4>
+    <p>Choose a workspace and jump straight into the task you want to handle.</p>
+  </div>
+
+  <div class="row home-feature-grid">
+    <div class="col-sm-6 col-lg-6 col-xl-4 feature-card-col">
+      <a href="{% url 'notes' %}" class="feature-link">
+        <div class="card feature-card">
           <div class="card-body">
-            <h5 class="card-title">
-              Notes
-            </h5>
-            Create Notes to refer them later. They are stored permanently until deleted
+            <div class="feature-card-icon feature-card-icon-primary"><i class="fas fa-sticky-note"></i></div>
+            <h5 class="card-title">Notes</h5>
+            <p class="card-text">Keep study material together.</p>
           </div>
         </div>
       </a>
     </div>
 
-    <div class="col-md-3">
-      <a href="{% url 'homework' %}">
-        <div class="card">
-          <div class="card-img-top bg-success text-white d-flex align-items-center justify-content-center" style="height: 210px;">
-            <i class="fas fa-book fa-3x"></i>
-          </div>
+    <div class="col-sm-6 col-lg-6 col-xl-4 feature-card-col">
+      <a href="{% url 'homework' %}" class="feature-link">
+        <div class="card feature-card">
           <div class="card-body">
-            <h5 class="card-title">
-              Homework
-            </h5>
-            Add homeworks and assign them deadlines. They will be displayed prioritised by deadlines
+            <div class="feature-card-icon feature-card-icon-success"><i class="fas fa-book"></i></div>
+            <h5 class="card-title">Homework</h5>
+            <p class="card-text">Track assignments and deadlines.</p>
           </div>
         </div>
       </a>
     </div>
-    <div class="col-md-3">
-      <a href="{% url 'youtube' %}">
-        <div class="card">
-          <div class="card-img-top bg-danger text-white d-flex align-items-center justify-content-center" style="height: 210px;">
-            <i class="fab fa-youtube fa-3x"></i>
-          </div>
+    <div class="col-sm-6 col-lg-6 col-xl-4 feature-card-col">
+      <a href="{% url 'youtube' %}" class="feature-link">
+        <div class="card feature-card">
           <div class="card-body">
-            <h5 class="card-title">
-              Youtube
-            </h5>
-            Search Youtube and select your desired video to play it on youtube
+            <div class="feature-card-icon feature-card-icon-danger"><i class="fab fa-youtube"></i></div>
+            <h5 class="card-title">Youtube</h5>
+            <p class="card-text">Search learning videos fast.</p>
           </div>
         </div>
       </a>
     </div>
-    <div class="col-md-3">
-      <a href="{% url 'todo' %}">
-        <div class="card">
-          <div class="card-img-top bg-warning text-white d-flex align-items-center justify-content-center" style="height: 210px;">
-            <i class="fas fa-tasks fa-3x"></i>
-          </div>
+    <div class="col-sm-6 col-lg-6 col-xl-4 feature-card-col">
+      <a href="{% url 'todo' %}" class="feature-link">
+        <div class="card feature-card">
           <div class="card-body">
-            <h5 class="card-title">
-              To Do
-            </h5>
-            Add your to-do lists for your day and remove them as you finish
+            <div class="feature-card-icon feature-card-icon-warning"><i class="fas fa-tasks"></i></div>
+            <h5 class="card-title">To Do</h5>
+            <p class="card-text">Plan and finish daily tasks.</p>
+          </div>
+        </div>
+      </a>
+    </div>
+    <div class="col-sm-6 col-lg-6 col-xl-4 feature-card-col">
+      <a href="{% url 'books' %}" class="feature-link">
+        <div class="card feature-card">
+          <div class="card-body">
+            <div class="feature-card-icon feature-card-icon-info"><i class="fas fa-book-open"></i></div>
+            <h5 class="card-title">Books</h5>
+            <p class="card-text">Open study references faster.</p>
+          </div>
+        </div>
+      </a>
+    </div>
+    <div class="col-sm-6 col-lg-6 col-xl-4 feature-card-col">
+      <a href="{% url 'dictionary' %}" class="feature-link">
+        <div class="card feature-card">
+          <div class="card-body">
+            <div class="feature-card-icon feature-card-icon-secondary"><i class="fas fa-search"></i></div>
+            <h5 class="card-title">Dictionary</h5>
+            <p class="card-text">Look up words quickly.</p>
+          </div>
+        </div>
+      </a>
+    </div>
+    <div class="col-sm-6 col-lg-6 col-xl-4 feature-card-col">
+      <a href="{% url 'wiki' %}" class="feature-link">
+        <div class="card feature-card">
+          <div class="card-body">
+            <div class="feature-card-icon feature-card-icon-dark"><i class="fab fa-wikipedia-w"></i></div>
+            <h5 class="card-title">Wikipedia</h5>
+            <p class="card-text">Search topics and background.</p>
+          </div>
+        </div>
+      </a>
+    </div>
+    <div class="col-sm-6 col-lg-6 col-xl-4 feature-card-col">
+      <a href="{% url 'conversion' %}" class="feature-link">
+        <div class="card feature-card">
+          <div class="card-body">
+            <div class="feature-card-icon feature-card-icon-light"><i class="fas fa-calculator"></i></div>
+            <h5 class="card-title">Conversion</h5>
+            <p class="card-text">Switch units quickly.</p>
+          </div>
+        </div>
+      </a>
+    </div>
+    <div class="col-sm-6 col-lg-6 col-xl-4 feature-card-col">
+      <a href="{% url 'calendar' %}" class="feature-link">
+        <div class="card feature-card">
+          <div class="card-body">
+            <div class="feature-card-icon feature-card-icon-info"><i class="fas fa-calendar-alt"></i></div>
+            <h5 class="card-title">Calendar</h5>
+            <p class="card-text">See deadlines in one view.</p>
+          </div>
+        </div>
+      </a>
+    </div>
+    <div class="col-sm-6 col-lg-6 col-xl-4 feature-card-col">
+      <a href="{% url 'study_sessions' %}" class="feature-link">
+        <div class="card feature-card">
+          <div class="card-body">
+            <div class="feature-card-icon feature-card-icon-success"><i class="fas fa-clock"></i></div>
+            <h5 class="card-title">Study Sessions</h5>
+            <p class="card-text">Track your study time.</p>
+          </div>
+        </div>
+      </a>
+    </div>
+    <div class="col-sm-6 col-lg-6 col-xl-4 feature-card-col">
+      <a href="{% url 'timer' %}" class="feature-link">
+        <div class="card feature-card">
+          <div class="card-body">
+            <div class="feature-card-icon feature-card-icon-warning"><i class="fas fa-stopwatch"></i></div>
+            <h5 class="card-title">Timer</h5>
+            <p class="card-text">Stay focused with a timer.</p>
+          </div>
+        </div>
+      </a>
+    </div>
+    <div class="col-sm-6 col-lg-6 col-xl-4 feature-card-col">
+      <a href="{% url 'flashcards' %}" class="feature-link">
+        <div class="card feature-card">
+          <div class="card-body">
+            <div class="feature-card-icon feature-card-icon-primary"><i class="fas fa-layer-group"></i></div>
+            <h5 class="card-title">Flashcards</h5>
+            <p class="card-text">Build quick revision decks.</p>
+          </div>
+        </div>
+      </a>
+    </div>
+    <div class="col-sm-6 col-lg-6 col-xl-4 feature-card-col feature-card-col-centered">
+      <a href="{% url 'quizzes' %}" class="feature-link">
+        <div class="card feature-card">
+          <div class="card-body">
+            <div class="feature-card-icon feature-card-icon-danger"><i class="fas fa-question-circle"></i></div>
+            <h5 class="card-title">Quizzes</h5>
+            <p class="card-text">Build quick practice quizzes.</p>
           </div>
         </div>
       </a>
     </div>
   </div>
-  <br><br><br>
-  <div class="row">
-    <div class="col-md-3 ">
-      <a href="{% url 'books' %}">
-        <div class="card mt-20">
-          <div class="card-img-top bg-info text-white d-flex align-items-center justify-content-center" style="height: 210px;">
-            <i class="fas fa-book-open fa-3x"></i>
-          </div>
-          <div class="card-body">
-            <h5 class="card-title">
-              Books
-            </h5>
-            Browse books from a list of neatly organised book menu
-          </div>
-        </div>
-      </a>
-    </div>
-
-
-
-    <div class="col-md-3">
-      <a href="{% url 'dictionary' %}">
-        <div class="card">
-          <div class="card-img-top bg-secondary text-white d-flex align-items-center justify-content-center" style="height: 210px;">
-            <i class="fas fa-search fa-3x"></i>
-          </div>
-          <div class="card-body">
-            <h5 class="card-title">
-              Dictionary
-            </h5>
-            A vocabulary from a book is troubling you? No problem, enter the word, and the meaning will be displayed
-            almost instantaneously.
-          </div>
-        </div>
-      </a>
-    </div>
-    <div class="col-md-3">
-      <a href="{% url 'wiki' %}">
-        <div class="card">
-          <div class="card-img-top bg-dark text-white d-flex align-items-center justify-content-center" style="height: 210px;">
-            <i class="fab fa-wikipedia-w fa-3x"></i>
-          </div>
-          <div class="card-body">
-            <h5 class="card-title">
-              WikiPedia
-            </h5>
-            Homework and Assignments? Search wikipedia to get fast results
-          </div>
-        </div>
-      </a>
-    </div>
-
-
-    <div class="col-md-3">
-      <a href="{% url 'conversion' %}">
-        <div class="card">
-          <div class="card-img-top bg-light text-dark d-flex align-items-center justify-content-center" style="height: 210px;">
-            <i class="fas fa-calculator fa-3x"></i>
-          </div>
-          <div class="card-body">
-            <h5 class="card-title">
-              Conversion
-            </h5>
-            Check out the conversion table, that helps you to convert measurements to more familiar ones of your choice.
-          </div>
-        </div>
-      </a>
-    </div>
-  </div>
-  <br><br><br>
-  <div class="row">
-    <div class="col-md-3">
-      <a href="{% url 'calendar' %}">
-        <div class="card">
-          <div class="card-img-top bg-info text-white d-flex align-items-center justify-content-center" style="height: 210px;">
-            <i class="fas fa-calendar-alt fa-3x"></i>
-          </div>
-          <div class="card-body">
-            <h5 class="card-title">
-              Calendar
-            </h5>
-            View upcoming homework and todo deadlines in a calendar format.
-          </div>
-        </div>
-      </a>
-    </div>
-    <div class="col-md-3">
-      <a href="{% url 'study_sessions' %}">
-        <div class="card">
-          <div class="card-img-top bg-success text-white d-flex align-items-center justify-content-center" style="height: 210px;">
-            <i class="fas fa-clock fa-3x"></i>
-          </div>
-          <div class="card-body">
-            <h5 class="card-title">
-              Study Sessions
-            </h5>
-            Track your study time and sessions for better productivity.
-          </div>
-        </div>
-      </a>
-    </div>
-    <div class="col-md-3">
-      <a href="{% url 'timer' %}">
-        <div class="card">
-          <div class="card-img-top bg-warning text-white d-flex align-items-center justify-content-center" style="height: 210px;">
-            <i class="fas fa-stopwatch fa-3x"></i>
-          </div>
-          <div class="card-body">
-            <h5 class="card-title">
-              Timer
-            </h5>
-            Use a study timer to manage your study sessions effectively.
-          </div>
-        </div>
-      </a>
-    </div>
-    <div class="col-md-3">
-      <a href="{% url 'flashcards' %}">
-        <div class="card">
-          <div class="card-img-top bg-primary text-white d-flex align-items-center justify-content-center" style="height: 210px;">
-            <i class="fas fa-layer-group fa-3x"></i>
-          </div>
-          <div class="card-body">
-            <h5 class="card-title">
-              Flashcards
-            </h5>
-            Create and review flashcard decks for memorization.
-          </div>
-        </div>
-      </a>
-    </div>
-  </div>
-  <br><br><br>
-  <div class="row">
-    <div class="col-md-3 offset-md-4">
-      <a href="{% url 'quizzes' %}">
-        <div class="card">
-          <div class="card-img-top bg-danger text-white d-flex align-items-center justify-content-center" style="height: 210px;">
-            <i class="fas fa-question-circle fa-3x"></i>
-          </div>
-          <div class="card-body">
-            <h5 class="card-title">
-              Quizzes
-            </h5>
-            Build and take quizzes to test your knowledge.
-          </div>
-        </div>
-      </a>
-    </div>
-  </div>
-
-
 </section>
 {% endblock content %}

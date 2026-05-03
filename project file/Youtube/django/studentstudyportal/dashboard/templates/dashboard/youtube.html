@@ -4,6 +4,7 @@
 
 <div class="container">
     <h2 class="mt-4">YouTube Search</h2>
+    <p class="search-page-copy">Enter a topic and jump straight to YouTube results. Embedded results appear only when the API is configured.</p>
     <form method="get" class="mb-4">
         <div class="form-group">
             <label for="query">Search YouTube</label>
@@ -13,16 +14,7 @@
     </form>
     {% if query %}
     <h5>Search Results for "{{ query }}"</h5>
-    {% if error_message %}
-        <div class="alert alert-info search-fallback">
-            Embedded videos need a YouTube API key. You can still open the same search directly on YouTube.
-        </div>
-        {% if youtube_url %}
-            <a href="{{ youtube_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-danger">
-                <i class="fab fa-youtube"></i> Open on YouTube
-            </a>
-        {% endif %}
-    {% elif videos %}
+    {% if videos %}
         <div class="row">
         {% for video in videos %}
         <div class="col-md-6 mb-4">
@@ -39,13 +31,6 @@
     {% if youtube_url %}
         <a href="{{ youtube_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-danger">
             <i class="fab fa-youtube"></i> More results on YouTube
-        </a>
-    {% endif %}
-    {% else %}
-    <p>No embedded videos found.</p>
-    {% if youtube_url %}
-        <a href="{{ youtube_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-danger">
-            <i class="fab fa-youtube"></i> Search on YouTube
         </a>
     {% endif %}
     {% endif %}

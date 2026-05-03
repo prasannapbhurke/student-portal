@@ -8,7 +8,10 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 import csv
+import difflib
+import json
 import urllib.parse
+import urllib.request
 from .models import Note, Homework, Todo, Subtask, Book, DictionaryEntry, ConversionEntry, StudySession, Export
 from .forms import NoteForm, HomeworkForm, TodoForm, SubtaskForm, StudySessionForm
 from .tasks import generate_notes_export
@@ -17,6 +20,19 @@ try:
     import requests
 except ModuleNotFoundError:
     requests = None
+
+
+def fetch_json(url, params=None, headers=None, timeout=5):
+    """Fetch JSON with requests when available, otherwise use urllib."""
+    if requests is not None:
+        response = requests.get(url, params=params, headers=headers, timeout=timeout)
+        response.raise_for_status()
+        return response.json()
+
+    query_string = f"?{urllib.parse.urlencode(params)}" if params else ''
+    request = urllib.request.Request(f'{url}{query_string}', headers=headers or {})
+    with urllib.request.urlopen(request, timeout=timeout) as response:
+        return json.loads(response.read().decode('utf-8'))
 
 def home(request):
     """Home page with feature overview"""
@@ -317,15 +333,63 @@ def books(request):
 
 def dictionary(request):
     """Dictionary search view"""
-    word = request.GET.get('word', '')
+    word = (request.GET.get('word') or '').strip()
     result = None
+    suggestion = None
+    api_result = None
+    lookup_url = None
     if word:
+        lookup_url = f"https://www.dictionary.com/browse/{urllib.parse.quote(word)}"
         try:
             result = DictionaryEntry.objects.get(word__iexact=word)
         except DictionaryEntry.DoesNotExist:
-            messages.info(request, 'Word not found in dictionary')
+            words = list(DictionaryEntry.objects.values_list('word', flat=True))
+            suggestion_matches = difflib.get_close_matches(word.lower(), [w.lower() for w in words], n=1, cutoff=0.7)
+            if suggestion_matches:
+                suggestion_lower = suggestion_matches[0]
+                suggestion = next((existing for existing in words if existing.lower() == suggestion_lower), None)
+                if suggestion:
+                    try:
+                        result = DictionaryEntry.objects.get(word__iexact=suggestion)
+                    except DictionaryEntry.DoesNotExist:
+                        result = None
+
+            if result is None:
+                try:
+                    data = fetch_json(
+                        f'https://api.dictionaryapi.dev/api/v2/entries/en/{urllib.parse.quote(word)}',
+                        timeout=5
+                    )
+                    if isinstance(data, list) and data:
+                        entry = data[0]
+                        meanings = entry.get('meanings', [])
+                        definition = None
+                        example = ''
+                        for meaning in meanings:
+                            definitions = meaning.get('definitions', [])
+                            if definitions:
+                                definition = definitions[0].get('definition')
+                                example = definitions[0].get('example', '')
+                                break
+                        phonetics = entry.get('phonetics', [])
+                        pronunciation = ''
+                        for phonetic in phonetics:
+                            if phonetic.get('text'):
+                                pronunciation = phonetic['text']
+                                break
+                        api_result = {
+                            'word': entry.get('word', word),
+                            'meaning': definition or 'Meaning unavailable.',
+                            'pronunciation': pronunciation,
+                            'example': example,
+                        }
+                except Exception:
+                    api_result = None
+
+            if result is None and api_result is None:
+                return redirect(lookup_url)
     
-    context = {'result': result, 'word': word}
+    context = {'result': result, 'api_result': api_result, 'word': word, 'suggestion': suggestion, 'lookup_url': lookup_url}
     return render(request, 'dashboard/dictionary.html', context)
 
 def conversion(request):
@@ -339,14 +403,11 @@ def youtube_search(request):
     """YouTube search view"""
     query = (request.GET.get('query') or '').strip()
     videos = []
-    error_message = None
     youtube_url = None
     if query:
         youtube_url = f"https://www.youtube.com/results?search_query={urllib.parse.quote_plus(query)}"
-        if not settings.YOUTUBE_API_KEY:
-            error_message = "YouTube API key is not configured, so embedded results are unavailable."
-        elif requests is None:
-            error_message = "The requests package is not installed, so embedded results are unavailable."
+        if not settings.YOUTUBE_API_KEY or requests is None:
+            return redirect(youtube_url)
         else:
             try:
                 response = requests.get('https://www.googleapis.com/youtube/v3/search', 
@@ -355,48 +416,45 @@ def youtube_search(request):
                 if response.status_code == 200:
                     data = response.json()
                     videos = data.get('items', [])
+                    if not videos:
+                        return redirect(youtube_url)
                 else:
-                    error_message = f"YouTube API error: {response.status_code}"
+                    return redirect(youtube_url)
             except Exception as e:
-                error_message = f"Error: {str(e)}"
-    context = {'query': query, 'videos': videos, 'error_message': error_message, 'youtube_url': youtube_url}
+                return redirect(youtube_url)
+    context = {'query': query, 'videos': videos, 'youtube_url': youtube_url}
     return render(request, 'dashboard/youtube.html', context)
 
 def wiki_search(request):
     """Wikipedia search view"""
     query = (request.GET.get('query') or '').strip()
-    summary = None
-    error_message = None
-    wiki_url = None
     if query:
-        wiki_url = f"https://en.wikipedia.org/wiki/Special:Search?search={urllib.parse.quote_plus(query)}"
-        if requests is None:
-            error_message = "The requests package is not installed, so the summary is unavailable."
-        else:
-            try:
-                encoded = urllib.parse.quote(query)
-                headers = {
-                    'User-Agent': 'StudentStudyPortal/1.0 (https://github.com/your-repo; contact@example.com)'
-                }
-                response = requests.get(
-                    f'https://en.wikipedia.org/api/rest_v1/page/summary/{encoded}',
-                    headers=headers,
-                    timeout=5
-                )
-                if response.status_code == 200:
-                    data = response.json()
-                    summary = data.get('extract')
-                    wiki_url = data.get('content_urls', {}).get('desktop', {}).get('page') or wiki_url
-                elif response.status_code == 404:
-                    summary = None  # No article found
-                elif response.status_code == 403:
-                    error_message = "Wikipedia API access denied. This may be due to rate limiting. Please try again later."
-                else:
-                    error_message = f"Wikipedia API error: {response.status_code}"
-            except Exception as e:
-                error_message = f"Error: {str(e)}"
-    context = {'query': query, 'summary': summary, 'error_message': error_message, 'wiki_url': wiki_url}
-    return render(request, 'dashboard/wiki.html', context)
+        wiki_search_url = f"https://en.wikipedia.org/wiki/Special:Search?search={urllib.parse.quote_plus(query)}&go=Go"
+        try:
+            data = fetch_json(
+                'https://en.wikipedia.org/w/api.php',
+                params={
+                    'action': 'query',
+                    'list': 'search',
+                    'srsearch': query,
+                    'format': 'json',
+                    'srlimit': 1,
+                    'utf8': 1,
+                },
+                headers={
+                    'User-Agent': 'StudentStudyPortal/1.0'
+                },
+                timeout=5
+            )
+            results = data.get('query', {}).get('search', [])
+            if results:
+                title = results[0].get('title', '').replace(' ', '_')
+                if title:
+                    return redirect(f'https://en.wikipedia.org/wiki/{urllib.parse.quote(title)}')
+        except Exception:
+            pass
+        return redirect(wiki_search_url)
+    return render(request, 'dashboard/wiki.html')
 
 @login_required
 def calendar_view(request):

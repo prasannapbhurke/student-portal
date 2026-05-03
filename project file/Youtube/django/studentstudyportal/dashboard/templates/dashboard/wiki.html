@@ -4,6 +4,7 @@
 
 <div class="container">
     <h2 class="mt-4">Wikipedia Search</h2>
+    <p class="search-page-copy">Search a topic and open the closest Wikipedia result directly, even when the spelling is slightly off.</p>
     <form method="get" class="mb-4">
         <div class="form-group">
             <label for="query">Search Wikipedia</label>
@@ -11,25 +12,6 @@
         </div>
         <button type="submit" class="btn btn-dark">Search</button>
     </form>
-    {% if query %}
-    <div class="card search-result-card">
-        <div class="card-body">
-            <h5 class="card-title">{{ query }}</h5>
-            {% if error_message %}
-                <div class="alert alert-warning">{{ error_message }}</div>
-            {% elif summary %}
-                <p class="card-text">{{ summary }}</p>
-            {% else %}
-                <p class="card-text">No summary found. You can still open Wikipedia search results for this topic.</p>
-            {% endif %}
-            {% if wiki_url %}
-                <a href="{{ wiki_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-dark">
-                    <i class="fab fa-wikipedia-w"></i> Open Wikipedia
-                </a>
-            {% endif %}
-        </div>
-    </div>
-    {% endif %}
 </div>
 
 {% endblock %}

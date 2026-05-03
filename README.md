@@ -23,8 +23,10 @@ Useful top-level files:
 - Study sessions and dashboard stats
 - Calendar view for upcoming work
 - Books, dictionary, and conversion utilities
-- Wikipedia search with direct open fallback
-- YouTube search with direct open fallback when API configuration is missing
+- Wikipedia search that redirects to the best matching article or search result
+- YouTube search that redirects directly to YouTube when embedded results are unavailable
+- Theme switching with saved color mode and accent theme preference
+- Enhanced homepage with a dashboard hero, highlight tiles, and a polished study tools grid
 - Timer, flashcards, and quizzes pages
 
 ## Local Setup
@@ -69,11 +71,18 @@ These settings are read from the environment when provided:
 - `CELERY_BROKER_URL`
 - `YOUTUBE_API_KEY`
 
-## YouTube and Wikipedia Behavior
+## Search Behavior
 
 - If `YOUTUBE_API_KEY` is configured, the YouTube page can load embedded search results.
-- If the API key is missing, the page still provides a direct YouTube search link.
-- Wikipedia search shows summaries when available and still provides a direct Wikipedia link when the API cannot return a summary.
+- If the API key is missing, YouTube searches redirect straight to the matching YouTube results page.
+- Wikipedia searches try to resolve the closest matching article title first.
+- If a close article match is not resolved, the app redirects to Wikipedia search results for the entered query.
+
+## Themes and UI
+
+- The app includes a dark mode toggle in the navbar.
+- Theme choices are saved in the browser using `localStorage`.
+- The homepage includes quick actions, summary stats, and a polished tool grid for faster navigation.
 
 ## Running Tests
 

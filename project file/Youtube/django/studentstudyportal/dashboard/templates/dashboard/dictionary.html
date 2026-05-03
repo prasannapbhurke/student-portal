@@ -4,6 +4,7 @@
 
 <div class="container">
     <h2 class="mt-4">Dictionary</h2>
+    <p class="search-page-copy">Search a word from the local dictionary first, then fall back to an online definition when needed.</p>
     <form method="get" class="mb-4">
         <div class="form-group">
             <label for="word">Enter Word</label>
@@ -14,6 +15,9 @@
     {% if result %}
     <div class="card">
         <div class="card-body">
+            {% if suggestion and suggestion|lower != word|lower %}
+            <p class="card-text"><strong>Showing closest local match:</strong> {{ suggestion }}</p>
+            {% endif %}
             <h5 class="card-title">{{ result.word }}</h5>
             {% if result.pronunciation %}
             <p class="card-text"><strong>Pronunciation:</strong> {{ result.pronunciation }}</p>
@@ -21,6 +25,20 @@
             <p class="card-text">{{ result.meaning }}</p>
             {% if result.example %}
             <p class="card-text"><strong>Example:</strong> {{ result.example }}</p>
+            {% endif %}
+        </div>
+    </div>
+    {% elif api_result %}
+    <div class="card">
+        <div class="card-body">
+            <p class="card-text"><strong>Source:</strong> Online dictionary lookup</p>
+            <h5 class="card-title">{{ api_result.word }}</h5>
+            {% if api_result.pronunciation %}
+            <p class="card-text"><strong>Pronunciation:</strong> {{ api_result.pronunciation }}</p>
+            {% endif %}
+            <p class="card-text">{{ api_result.meaning }}</p>
+            {% if api_result.example %}
+            <p class="card-text"><strong>Example:</strong> {{ api_result.example }}</p>
             {% endif %}
         </div>
     </div>

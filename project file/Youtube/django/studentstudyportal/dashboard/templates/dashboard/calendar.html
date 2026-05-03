@@ -2,44 +2,148 @@
 {% load static %}
 {% block content %}
 
-<div class="container">
-    <h2 class="mt-4">Study Calendar</h2>
-    <p>Upcoming deadlines and tasks</p>
+<div class="container calendar-page">
+    <div class="calendar-header">
+        <div>
+            <h2 class="mt-4">Study Calendar</h2>
+            <p class="search-page-copy">Track upcoming homework and open todos in one simple timeline.</p>
+        </div>
+        <div class="calendar-today-pill">Today: {{ today }}</div>
+    </div>
 
     <div class="row">
-        <div class="col-md-6">
-            <h4>Homework Deadlines</h4>
-            {% for hw in upcoming_homework %}
-            <div class="card mb-3">
+        <div class="col-lg-7 mb-4">
+            <div class="card calendar-board">
                 <div class="card-body">
-                    <h5 class="card-title">{{ hw.title }}</h5>
-                    <p class="card-text">{{ hw.subject }}</p>
-                    <p class="card-text"><strong>Due:</strong> {{ hw.due_date }}</p>
+                    <div class="calendar-toolbar">
+                        <button type="button" class="btn btn-outline-primary btn-sm" id="calendar-prev">Previous</button>
+                        <h4 id="calendar-month-label" class="mb-0"></h4>
+                        <button type="button" class="btn btn-outline-primary btn-sm" id="calendar-next">Next</button>
+                    </div>
+                    <div class="calendar-weekdays">
+                        <span>Sun</span>
+                        <span>Mon</span>
+                        <span>Tue</span>
+                        <span>Wed</span>
+                        <span>Thu</span>
+                        <span>Fri</span>
+                        <span>Sat</span>
+                    </div>
+                    <div id="calendar-grid" class="calendar-grid"></div>
                 </div>
             </div>
-            {% empty %}
-            <p>No upcoming homework.</p>
-            {% endfor %}
         </div>
-
-        <div class="col-md-6">
-            <h4>Todo Due Dates</h4>
-            {% for todo in upcoming_todos %}
-            <div class="card mb-3">
+        <div class="col-lg-5 mb-4">
+            <div class="card calendar-agenda">
                 <div class="card-body">
-                    <h5 class="card-title">{{ todo.title }}</h5>
-                    <p class="card-text">{{ todo.category }}</p>
-                    <p class="card-text"><strong>Due:</strong> {{ todo.due_date }}</p>
-                    <div class="progress">
-                        <div class="progress-bar" style="width: {{ todo.progress }}%">{{ todo.progress }}%</div>
+                    <h4 class="mb-3">Upcoming Agenda</h4>
+                    <div class="calendar-agenda-list">
+                        {% for hw in upcoming_homework %}
+                        <div class="agenda-item agenda-item-homework">
+                            <div class="agenda-item-date">{{ hw.deadline|date:"M d" }}</div>
+                            <div class="agenda-item-body">
+                                <h5 class="card-title">{{ hw.title }}</h5>
+                                <p class="card-text">{{ hw.subject }} • {{ hw.deadline|date:"g:i A" }}</p>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <p class="card-text">No upcoming homework.</p>
+                        {% endfor %}
+
+                        {% for todo in upcoming_todos %}
+                        <div class="agenda-item agenda-item-todo">
+                            <div class="agenda-item-date">{{ todo.due_date|date:"M d" }}</div>
+                            <div class="agenda-item-body">
+                                <h5 class="card-title">{{ todo.title }}</h5>
+                                <p class="card-text">{{ todo.get_category_display }} • {{ todo.progress }}% complete</p>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <p class="card-text">No upcoming todos.</p>
+                        {% endfor %}
                     </div>
                 </div>
             </div>
-            {% empty %}
-            <p>No upcoming todos.</p>
-            {% endfor %}
         </div>
     </div>
 </div>
+
+{{ events|json_script:"calendar-events" }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const events = JSON.parse(document.getElementById('calendar-events').textContent);
+    const grid = document.getElementById('calendar-grid');
+    const label = document.getElementById('calendar-month-label');
+    const prevButton = document.getElementById('calendar-prev');
+    const nextButton = document.getElementById('calendar-next');
+    const today = new Date();
+    let currentMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+
+    function formatKey(date) {
+        return date.toISOString().slice(0, 10);
+    }
+
+    function renderCalendar() {
+        grid.innerHTML = '';
+        label.textContent = currentMonth.toLocaleDateString(undefined, { month: 'long', year: 'numeric' });
+
+        const firstDay = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1);
+        const lastDay = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0);
+        const startOffset = firstDay.getDay();
+        const totalDays = lastDay.getDate();
+
+        for (let i = 0; i < startOffset; i += 1) {
+            const emptyCell = document.createElement('div');
+            emptyCell.className = 'calendar-day calendar-day-empty';
+            grid.appendChild(emptyCell);
+        }
+
+        for (let day = 1; day <= totalDays; day += 1) {
+            const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
+            const dateKey = formatKey(date);
+            const dayEvents = events.filter((event) => event.start === dateKey);
+            const dayCell = document.createElement('div');
+            dayCell.className = 'calendar-day';
+            if (dateKey === formatKey(today)) {
+                dayCell.classList.add('calendar-day-today');
+            }
+
+            const number = document.createElement('span');
+            number.className = 'calendar-day-number';
+            number.textContent = day;
+            dayCell.appendChild(number);
+
+            dayEvents.slice(0, 2).forEach((event) => {
+                const chip = document.createElement('div');
+                chip.className = 'calendar-event-chip';
+                chip.textContent = event.title;
+                chip.style.borderLeftColor = event.color;
+                dayCell.appendChild(chip);
+            });
+
+            if (dayEvents.length > 2) {
+                const more = document.createElement('div');
+                more.className = 'calendar-more-events';
+                more.textContent = `+${dayEvents.length - 2} more`;
+                dayCell.appendChild(more);
+            }
+
+            grid.appendChild(dayCell);
+        }
+    }
+
+    prevButton.addEventListener('click', function() {
+        currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1, 1);
+        renderCalendar();
+    });
+
+    nextButton.addEventListener('click', function() {
+        currentMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1);
+        renderCalendar();
+    });
+
+    renderCalendar();
+});
+</script>
 
 {% endblock %}
