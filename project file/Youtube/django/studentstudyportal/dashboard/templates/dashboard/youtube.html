@@ -14,7 +14,14 @@
     {% if query %}
     <h5>Search Results for "{{ query }}"</h5>
     {% if error_message %}
-        <div class="alert alert-warning">{{ error_message }}</div>
+        <div class="alert alert-info search-fallback">
+            Embedded videos need a YouTube API key. You can still open the same search directly on YouTube.
+        </div>
+        {% if youtube_url %}
+            <a href="{{ youtube_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-danger">
+                <i class="fab fa-youtube"></i> Open on YouTube
+            </a>
+        {% endif %}
     {% elif videos %}
         <div class="row">
         {% for video in videos %}
@@ -29,8 +36,18 @@
         </div>
         {% endfor %}
     </div>
+    {% if youtube_url %}
+        <a href="{{ youtube_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-danger">
+            <i class="fab fa-youtube"></i> More results on YouTube
+        </a>
+    {% endif %}
     {% else %}
-    <p>No videos found. Try a different query or check API key.</p>
+    <p>No embedded videos found.</p>
+    {% if youtube_url %}
+        <a href="{{ youtube_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-danger">
+            <i class="fab fa-youtube"></i> Search on YouTube
+        </a>
+    {% endif %}
     {% endif %}
     {% endif %}
 </div>

@@ -214,6 +214,26 @@ h1, h2, h3, h4, h5, h6 {
     font-size: 0.95rem;
 }
 
+.search-result-card .card-body {
+    padding: 1.5rem;
+}
+
+.search-result-card .card-title {
+    margin-bottom: 1rem;
+}
+
+.search-result-card .card-text,
+.search-fallback {
+    text-align: left;
+    margin: 0 0 1rem 0;
+    line-height: 1.6;
+    color: #555;
+}
+
+.search-result-card:hover {
+    transform: none;
+}
+
 /* Dark mode support */
 .dark-mode, @media (prefers-color-scheme: dark) {
     body {

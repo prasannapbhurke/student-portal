@@ -8,11 +8,15 @@ from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 import csv
-import requests
 import urllib.parse
 from .models import Note, Homework, Todo, Subtask, Book, DictionaryEntry, ConversionEntry, StudySession, Export
 from .forms import NoteForm, HomeworkForm, TodoForm, SubtaskForm, StudySessionForm
 from .tasks import generate_notes_export
+
+try:
+    import requests
+except ModuleNotFoundError:
+    requests = None
 
 def home(request):
     """Home page with feature overview"""
@@ -333,12 +337,16 @@ def conversion(request):
 
 def youtube_search(request):
     """YouTube search view"""
-    query = request.GET.get('query')
+    query = (request.GET.get('query') or '').strip()
     videos = []
     error_message = None
+    youtube_url = None
     if query:
+        youtube_url = f"https://www.youtube.com/results?search_query={urllib.parse.quote_plus(query)}"
         if not settings.YOUTUBE_API_KEY:
-            error_message = "YouTube API key not configured."
+            error_message = "YouTube API key is not configured, so embedded results are unavailable."
+        elif requests is None:
+            error_message = "The requests package is not installed, so embedded results are unavailable."
         else:
             try:
                 response = requests.get('https://www.googleapis.com/youtube/v3/search', 
@@ -351,37 +359,43 @@ def youtube_search(request):
                     error_message = f"YouTube API error: {response.status_code}"
             except Exception as e:
                 error_message = f"Error: {str(e)}"
-    context = {'query': query, 'videos': videos, 'error_message': error_message}
+    context = {'query': query, 'videos': videos, 'error_message': error_message, 'youtube_url': youtube_url}
     return render(request, 'dashboard/youtube.html', context)
 
 def wiki_search(request):
     """Wikipedia search view"""
-    query = request.GET.get('query')
+    query = (request.GET.get('query') or '').strip()
     summary = None
     error_message = None
+    wiki_url = None
     if query:
-        try:
-            encoded = urllib.parse.quote(query)
-            headers = {
-                'User-Agent': 'StudentStudyPortal/1.0 (https://github.com/your-repo; contact@example.com)'
-            }
-            response = requests.get(
-                f'https://en.wikipedia.org/api/rest_v1/page/summary/{encoded}',
-                headers=headers,
-                timeout=5
-            )
-            if response.status_code == 200:
-                data = response.json()
-                summary = data.get('extract')
-            elif response.status_code == 404:
-                summary = None  # No article found
-            elif response.status_code == 403:
-                error_message = "Wikipedia API access denied. This may be due to rate limiting. Please try again later."
-            else:
-                error_message = f"Wikipedia API error: {response.status_code}"
-        except Exception as e:
-            error_message = f"Error: {str(e)}"
-    context = {'query': query, 'summary': summary, 'error_message': error_message}
+        wiki_url = f"https://en.wikipedia.org/wiki/Special:Search?search={urllib.parse.quote_plus(query)}"
+        if requests is None:
+            error_message = "The requests package is not installed, so the summary is unavailable."
+        else:
+            try:
+                encoded = urllib.parse.quote(query)
+                headers = {
+                    'User-Agent': 'StudentStudyPortal/1.0 (https://github.com/your-repo; contact@example.com)'
+                }
+                response = requests.get(
+                    f'https://en.wikipedia.org/api/rest_v1/page/summary/{encoded}',
+                    headers=headers,
+                    timeout=5
+                )
+                if response.status_code == 200:
+                    data = response.json()
+                    summary = data.get('extract')
+                    wiki_url = data.get('content_urls', {}).get('desktop', {}).get('page') or wiki_url
+                elif response.status_code == 404:
+                    summary = None  # No article found
+                elif response.status_code == 403:
+                    error_message = "Wikipedia API access denied. This may be due to rate limiting. Please try again later."
+                else:
+                    error_message = f"Wikipedia API error: {response.status_code}"
+            except Exception as e:
+                error_message = f"Error: {str(e)}"
+    context = {'query': query, 'summary': summary, 'error_message': error_message, 'wiki_url': wiki_url}
     return render(request, 'dashboard/wiki.html', context)
 
 @login_required

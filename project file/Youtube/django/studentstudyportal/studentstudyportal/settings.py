@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 import os
+import importlib.util
 import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -40,9 +41,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'whitenoise',
-    'crispy_forms',
     'dashboard',
 ]
+
+if importlib.util.find_spec('crispy_forms'):
+    INSTALLED_APPS.append('crispy_forms')
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

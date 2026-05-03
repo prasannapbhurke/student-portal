@@ -12,18 +12,20 @@
         <button type="submit" class="btn btn-dark">Search</button>
     </form>
     {% if query %}
-    <div class="card">
+    <div class="card search-result-card">
         <div class="card-body">
             <h5 class="card-title">{{ query }}</h5>
             {% if error_message %}
                 <div class="alert alert-warning">{{ error_message }}</div>
             {% elif summary %}
                 <p class="card-text">{{ summary }}</p>
-                <a href="https://en.wikipedia.org/wiki/{{ query|urlencode }}" target="_blank" class="btn btn-dark">
-                    <i class="fab fa-wikipedia-w"></i> View Full Page
-                </a>
             {% else %}
-                <p class="card-text">No summary found. Try a different query.</p>
+                <p class="card-text">No summary found. You can still open Wikipedia search results for this topic.</p>
+            {% endif %}
+            {% if wiki_url %}
+                <a href="{{ wiki_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-dark">
+                    <i class="fab fa-wikipedia-w"></i> Open Wikipedia
+                </a>
             {% endif %}
         </div>
     </div>

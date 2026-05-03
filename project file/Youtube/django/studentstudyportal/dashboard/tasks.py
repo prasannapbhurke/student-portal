@@ -1,8 +1,13 @@
-from celery import shared_task
 import csv
 from io import StringIO
-from django.core.files.base import ContentFile
 from .models import Note, Export
+
+try:
+    from celery import shared_task
+except ModuleNotFoundError:
+    def shared_task(func):
+        func.delay = func
+        return func
 
 @shared_task
 def generate_notes_export(export_id):
