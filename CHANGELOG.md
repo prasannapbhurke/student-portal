@@ -16,3 +16,4 @@ All notable changes to this project will be documented in this file.
 - Fixed the navbar theme script and made saved theme preferences work more reliably.
 - Refreshed the homepage with a stronger hero section, quick actions, highlight cards, and improved feature-card spacing.
 - Expanded the documentation to cover themes, search behavior, and the enhanced homepage.
+- Replaced the short README with full project documentation covering architecture, features, models, routes, setup, testing, deployment, and current limitations.
